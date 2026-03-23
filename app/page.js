@@ -669,8 +669,8 @@ const HowItWorks = () => {
         <div className="max-w-[480px] order-1 lg:order-2 lg:py-4">
           <h3 className={howStepTitle}>From raw data to a finished document</h3>
           <p className={howStepBody}>
-            Spreadsheets, exports, and scattered fields come in messy. Omnigence turns them into one clean,
-            formatted document—ready to review or send—without you rebuilding it by hand.
+            PDFs, Excel sheets, exports from Microsoft and Adobe—Omnigence turns them into one clean,
+            formatted document, ready to review or send.
           </p>
         </div>
       </div>
@@ -2055,7 +2055,7 @@ export default function Page() {
             {/* Left */}
             <div className="max-w-[440px]">
               <h1 className="font-medium text-[48px] leading-[1.03] tracking-[-0.03em] text-gray-900 sm:text-[56px] lg:text-[64px]">
-                AI for business corporations
+                An AI agent you can train to run your operations
               </h1>
               <p className="mt-6 text-[16px] leading-[24px] text-[#6B7280]">
                 Turn documents, approvals, and company knowledge into automated workflows.
@@ -2272,7 +2272,7 @@ export default function Page() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.02, ease: heroEase }}
               >
-                AI for business corporations
+                An AI agent you can train to run your operations
               </motion.h1>
               <motion.p
                 className="mt-6 text-[16px] leading-[1.6] text-[#0e0c0c]/60 max-w-[340px]"
@@ -2518,7 +2518,7 @@ export default function Page() {
         <div className="relative px-6 pb-16 lg:hidden">
           <div className="relative mx-auto max-w-[520px] pt-24 pb-8">
             <h1 className="text-[40px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900">
-              AI for business corporations
+              An AI agent you can train to run your operations
             </h1>
             <p className="mt-6 text-[16px] leading-[1.7] text-[#6B7280]">
               Turn documents, approvals, and company knowledge into automated workflows.
@@ -2600,7 +2600,7 @@ export default function Page() {
                 <div className="space-y-7">
                   <div>
                     <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
-                      You control your data
+                      You <span className="text-[#2B5BC8]">control</span> your data
                     </h3>
                     <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
                       Your files stay yours. You decide where they live and how they're used.
@@ -2609,7 +2609,7 @@ export default function Page() {
 
                   <div>
                     <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
-                      Zero data retention
+                      <span className="text-[#2B5BC8]">Zero</span> data retention
                     </h3>
                     <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
                       Data is processed and immediately discarded. Nothing is stored or cached.
