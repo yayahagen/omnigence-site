@@ -1,0 +1,447 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand atmosphere — premium blue system */
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --border: rgba(0, 0, 0, 0.08);
+  --text: #111111;
+  --muted: #64748b;
+  --muted-soft: #94a3b8;
+  --accent: #2B5BC8;
+  --accent-dark: #1F45A8;
+  --accent-light: rgba(43, 91, 200, 0.18);
+}
+
+/* Brand accent — cool blue highlight (e.g. hero headline) */
+.accent-teal {
+  color: #2B5BC8;
+  font-weight: 600;
+}
+
+/* Problem section accent — subtle muted red to signal problems gently */
+.accent-red {
+  color: #c2410c;
+  font-weight: 600;
+}
+
+html {
+  height: 100%;
+  background: #fafafa;
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+p {
+  letter-spacing: 0.025em;
+}
+
+body {
+  min-height: 100vh;
+  height: 100%;
+  background: #fafafa;
+  background-attachment: fixed;
+  color: var(--text);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: rgba(43, 91, 200, 0.28);
+}
+
+/* Apple-like (thin, rounded, subtle) scrollbars */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.75) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.7);
+  border-radius: 999px;
+  /* Inset look so the thumb feels lighter */
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(148, 163, 184, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(148, 163, 184, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.14);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(148, 163, 184, 0.7);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+  }
+}
+
+/* Logo: no filters — display exactly as in asset */
+img[alt="Omnigence logo"] {
+  filter: none !important;
+}
+
+/* Landing: Stripe-style full-width section separation — single 1px line, no shadows */
+.section-divider {
+  display: block;
+  width: 100%;
+  max-width: none;
+  height: 1px;
+  margin: 0;
+  border: none;
+  flex-shrink: 0;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
+/* Hero metric highlight pulse — draws attention to key stat */
+@keyframes hero-metric-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(43, 91, 200, 0.22); }
+  50% { box-shadow: 0 0 0 4px rgba(43, 91, 200, 0.42); }
+}
+.hero-metric-highlight {
+  animation: hero-metric-pulse 2.5s ease-in-out 1s infinite;
+}
+
+/* Nav "Book a Demo" — Glean-style: glowing ring + clockwise sweep (conic gradient) */
+@keyframes nav-cta-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.nav-cta-glow {
+  position: relative;
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 9999px;
+  overflow: hidden;
+  isolation: isolate;
+  /* Soft outer glow */
+  box-shadow:
+    0 0 0 1px rgba(43, 91, 200, 0.14),
+    0 0 20px rgba(43, 91, 200, 0.28),
+    0 0 42px rgba(31, 69, 168, 0.16);
+}
+
+.nav-cta-glow::before {
+  content: "";
+  position: absolute;
+  /* Oversized layer so rotation stays smooth at pill corners */
+  inset: -50%;
+  z-index: 0;
+  border-radius: inherit;
+  transform-origin: center;
+  /* Narrow bright segment travels clockwise when rotated */
+  background: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(43, 91, 200, 0.2) 0deg,
+    rgba(76, 123, 234, 0.26) 200deg,
+    rgba(255, 255, 255, 0.55) 248deg,
+    rgba(189, 214, 255, 0.95) 262deg,
+    rgba(43, 91, 200, 1) 276deg,
+    rgba(76, 123, 234, 0.78) 292deg,
+    rgba(43, 91, 200, 0.22) 318deg,
+    rgba(43, 91, 200, 0.2) 360deg
+  );
+  animation: nav-cta-border-spin 3.2s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-cta-glow {
+    box-shadow: 0 0 0 1px rgba(43, 91, 200, 0.35);
+  }
+
+  .nav-cta-glow::before {
+    inset: 0;
+    animation: none;
+    background: linear-gradient(135deg, rgba(43, 91, 200, 0.88), rgba(76, 123, 234, 0.95));
+  }
+}
+
+/* Shared dot grid: darker dots on oatmeal — Glean-style */
+.dot-grid-base {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Use-case example panel: lighter dot grid */
+.use-case-panel-dots {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Three pillars — cool blue/aqua field with subtle violet depth */
+.pillar-panel-gradient {
+  background-image:
+    radial-gradient(ellipse 78% 58% at 88% 14%, rgba(76, 123, 234, 0.30) 0%, transparent 58%),
+    radial-gradient(ellipse 68% 50% at 12% 88%, rgba(43, 91, 200, 0.20) 0%, transparent 54%),
+    linear-gradient(
+      145deg,
+      rgba(234, 245, 255, 0.72) 0%,
+      rgba(76, 123, 234, 0.26) 32%,
+      rgba(43, 91, 200, 0.22) 58%,
+      rgba(31, 69, 168, 0.20) 78%,
+      rgba(76, 123, 234, 0.18) 100%
+    );
+}
+
+/* Full-panel dot grid for pillar tab */
+.pillar-panel-dots {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Centers the white card in the pillar panel */
+.pillar-visual-stage {
+  width: 100%;
+  max-width: 42rem;
+  margin-left: auto;
+  margin-right: auto;
+  min-height: 20rem;
+  padding: clamp(1.25rem, 4vw, 2.75rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .pillar-visual-stage {
+    min-height: 24rem;
+  }
+}
+
+/* Shared floating white card — stronger depth vs gradient + stage */
+.pillar-content-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.88);
+  box-shadow:
+    0 0 0 1px rgba(13, 22, 48, 0.05),
+    0 16px 42px rgba(13, 22, 48, 0.14),
+    0 30px 78px rgba(13, 22, 48, 0.1);
+}
+
+/* Solutions section: product preview panel dot grid */
+.solutions-panel-dots {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Problem section: subtle grid background */
+.problem-section-bg {
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 75%);
+}
+
+/* CTA: dotted grid on light */
+.cta-dot-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 20%, transparent 70%);
+}
+
+/* Hero: dot grid on light */
+.hero-dot-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 20%, transparent 70%);
+}
+
+.hero-sparkle-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(76, 123, 234, 0.48) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image:
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%);
+  -webkit-mask-image:
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%);
+  mask-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px;
+  -webkit-mask-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px;
+  mask-position: 12% 22%, 82% 28%, 48% 12%, 24% 58%;
+  -webkit-mask-position: 12% 22%, 82% 28%, 48% 12%, 24% 58%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  animation: cta-cluster-dots-drift 22s ease-in-out infinite;
+}
+
+/* Brighter cool-blue dots in hero/CTA */
+.cta-cluster-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(76, 123, 234, 0.44) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image:
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%);
+  -webkit-mask-image:
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%),
+    radial-gradient(circle 85px at 50% 50%, black 0%, black 78%, transparent 82%);
+  mask-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px;
+  -webkit-mask-size: 200px 200px, 200px 200px, 200px 200px, 200px 200px;
+  mask-position: 12% 22%, 82% 28%, 48% 12%, 24% 58%;
+  -webkit-mask-position: 12% 22%, 82% 28%, 48% 12%, 24% 58%;
+  mask-repeat: no-repeat;
+  -webkit-mask-repeat: no-repeat;
+  animation: cta-cluster-dots-drift 22s ease-in-out infinite;
+}
+
+/* Dark CTA section dots (Figma-like placement + density) */
+.cta-dark-dots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.42) 1px, transparent 1px);
+  background-size: 16px 16px;
+  opacity: 0.56;
+  overflow: hidden;
+  will-change: opacity, transform;
+  /* Not uniform across full section: dots are strong in central bands, faint at outer zones */
+  mask-image:
+    radial-gradient(ellipse 36% 58% at 24% 42%, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 78%),
+    radial-gradient(ellipse 36% 58% at 76% 42%, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 78%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.2) 100%);
+  -webkit-mask-image:
+    radial-gradient(ellipse 36% 58% at 24% 42%, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 78%),
+    radial-gradient(ellipse 36% 58% at 76% 42%, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 78%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.2) 100%);
+  mask-composite: add;
+  -webkit-mask-composite: source-over;
+  animation:
+    cta-dot-opacity-pulse 5.4s ease-in-out infinite,
+    cta-dot-subtle-drift 18s ease-in-out infinite;
+}
+
+.cta-dark-dots::after {
+  content: "";
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0) 22%,
+    rgba(255, 255, 255, 0.045) 46%,
+    rgba(255, 255, 255, 0.06) 52%,
+    rgba(255, 255, 255, 0.03) 58%,
+    rgba(255, 255, 255, 0) 78%
+  );
+  opacity: 0.18;
+  mix-blend-mode: screen;
+  transform: translate3d(-18%, -8%, 0);
+  will-change: transform, opacity;
+  animation: cta-dot-light-wave 21s linear infinite;
+}
+
+@keyframes cta-dot-opacity-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.62; }
+}
+
+@keyframes cta-dot-light-wave {
+  0% {
+    transform: translate3d(-18%, -8%, 0);
+    opacity: 0.12;
+  }
+  50% {
+    transform: translate3d(12%, 8%, 0);
+    opacity: 0.2;
+  }
+  100% {
+    transform: translate3d(38%, 20%, 0);
+    opacity: 0.12;
+  }
+}
+
+@keyframes cta-dot-subtle-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(1.5px, -1px, 0); }
+}
+
+@keyframes cta-cluster-dots-drift {
+  0%, 100% {
+    mask-position: 12% 22%, 82% 28%, 48% 12%, 24% 58%;
+    -webkit-mask-position: 12% 22%, 82% 28%, 48% 12%, 24% 58%;
+  }
+  25% {
+    mask-position: 55% 55%, 22% 72%, 28% 78%, 72% 24%;
+    -webkit-mask-position: 55% 55%, 22% 72%, 28% 78%, 72% 24%;
+  }
+  50% {
+    mask-position: 88% 28%, 62% 18%, 92% 48%, 42% 88%;
+    -webkit-mask-position: 88% 28%, 62% 18%, 92% 48%, 42% 88%;
+  }
+  75% {
+    mask-position: 30% 65%, 75% 55%, 15% 35%, 58% 45%;
+    -webkit-mask-position: 30% 65%, 75% 55%, 15% 35%, 58% 45%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-cluster-dots,
+  .hero-sparkle-dots {
+    animation: none;
+  }
+  .hero-sparkle-dots {
+    opacity: 0.7;
+  }
+  .cta-dark-dots,
+  .cta-dark-dots::after {
+    animation: none;
+  }
+  .cta-dark-dots::after {
+    opacity: 0.1;
+    transform: translate3d(0, 0, 0);
+  }
+}

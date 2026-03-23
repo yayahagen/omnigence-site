@@ -1,0 +1,13 @@
+<svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Figma Omnigence · node 297:119 (mark 297:108) -->
+  <g transform="translate(40 40)">
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(0)"/>
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(45)"/>
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(90)"/>
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(135)"/>
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(180)"/>
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(225)"/>
+    <rect x="-3.25" y="-31" width="6.5" height="21" fill="#00bcac" transform="rotate(270)"/>
+    <path fill="#00bcac" d="M -28 -28 L -10 -28 L -10 -19 L -19 -19 L -19 -10 L -28 -10 Z"/>
+  </g>
+</svg>
