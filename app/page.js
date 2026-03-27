@@ -646,7 +646,7 @@ const HowItWorks = () => {
         <div className="relative w-full max-w-[500px] lg:ml-auto lg:py-4">
           <div
             className="pointer-events-none relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl p-6 lg:min-h-[360px] lg:p-8"
-            style={{ background: "linear-gradient(145deg, #eaf3ff 0%, #d9e8ff 42%, #c6d6ff 100%)" }}
+            style={{ background: "linear-gradient(145deg, #e1eeff 0%, #c6dbff 38%, #aabfff 72%, #b39cff 100%)" }}
             aria-hidden="true"
           >
             <UploadRequestDemo />
@@ -659,7 +659,7 @@ const HowItWorks = () => {
         <div className="relative w-full max-w-[500px] order-2 lg:order-1 lg:py-4">
           <div
             className="pointer-events-none relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl p-6 lg:min-h-[360px] lg:p-8"
-            style={{ background: "linear-gradient(145deg, #eaf3ff 0%, #d9e8ff 42%, #c6d6ff 100%)" }}
+            style={{ background: "linear-gradient(145deg, #e1eeff 0%, #c6dbff 38%, #aabfff 72%, #b39cff 100%)" }}
             aria-hidden="true"
           >
             <DataToDocumentDemo />
@@ -687,7 +687,7 @@ const HowItWorks = () => {
         <div className="relative w-full max-w-[500px] lg:ml-auto lg:py-4">
           <div
             className="rounded-2xl p-6 min-h-[320px] lg:min-h-[360px] relative overflow-hidden flex flex-col justify-center gap-3"
-            style={{ background: "linear-gradient(145deg, #eaf3ff 0%, #d9e8ff 42%, #c6d6ff 100%)" }}
+            style={{ background: "linear-gradient(145deg, #e1eeff 0%, #c6dbff 38%, #aabfff 72%, #b39cff 100%)" }}
           >
             {/* Review queue cards — calm sequential approval flow */}
             <motion.div
@@ -1273,86 +1273,50 @@ const PillarAutomationVisual = () => {
 };
 
 /**
- * Security: user chooses the environment where their data runs.
- * Minimal control-focused UI: one toggle, one clear state.
+ * Security comparison: local vs cloud deployment options.
+ * Static, scan-friendly decision layout with minimal chrome.
  */
 const PillarSecurityVisual = () => {
-  const reduceMotion = useReducedMotion();
-  const rootRef = useRef(null);
-  const inView = useInView(rootRef, { once: false, amount: 0.45, margin: "0px 0px -10% 0px" });
-  const [env, setEnv] = useState("local"); // "local" | "vpc"
-  const [manualSelection, setManualSelection] = useState(false);
-
-  const ease = [0.22, 1, 0.36, 1];
-  const toggleDuration = reduceMotion ? 0 : 0.32;
-
-  useEffect(() => {
-    if (reduceMotion || manualSelection || !inView) return undefined;
-    const id = window.setInterval(() => {
-      setEnv((prev) => (prev === "local" ? "vpc" : "local"));
-    }, 2800);
-    return () => window.clearInterval(id);
-  }, [inView, manualSelection, reduceMotion]);
-
-  const status = env === "local" ? "Running locally" : "Running in your VPC";
+  const columns = [
+    {
+      title: "Local",
+      items: [
+        { icon: ShieldCheck, label: "You own your data" },
+        { icon: Layers, label: "Runs on your machine" },
+        { icon: Wallet, label: "No token usage or ongoing cost" },
+      ],
+    },
+    {
+      title: "Cloud / VPC",
+      items: [
+        { icon: KeyRound, label: "Zero data retention" },
+        { icon: Unplug, label: "No infrastructure overhead" },
+        { icon: ShieldCheck, label: "Fully managed deployment" },
+      ],
+    },
+  ];
 
   return (
-    <div
-      ref={rootRef}
-      className="pillar-content-card w-full max-w-[480px] mx-auto p-6 sm:p-8"
-      role="img"
-      aria-label={
-        env === "local"
-          ? "You are running locally. Your data stays contained."
-          : "You are running in your VPC. Your data stays contained."
-      }
-    >
-      {/* Control + result (no nested frames) */}
-      {/* Chrome window controls (decorative) */}
-      <div className="flex items-center gap-1.5 mb-3 pb-2 border-b border-gray-100">
-        <span className="h-2.5 w-2.5 rounded-full bg-[#e85d5d]" aria-hidden />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#e8b35d]" aria-hidden />
-        <span className="h-2.5 w-2.5 rounded-full bg-[#d1d5db]" aria-hidden />
-      </div>
-      <div className="inline-flex w-full rounded-xl border border-gray-200 bg-gray-50 p-1">
-        {["local", "vpc"].map((option) => (
-          <button
-            key={option}
-            type="button"
-            onClick={() => {
-              setEnv(option);
-              setManualSelection(true);
-            }}
-            className="relative flex-1 rounded-lg px-3 py-2.5 text-[13px] font-semibold"
+    <div className="pillar-content-card w-full max-w-[640px] mx-auto p-6 sm:p-8" role="img" aria-label="Comparison of local and cloud or VPC deployment options">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10">
+        {columns.map((column, idx) => (
+          <div
+            key={column.title}
+            className={idx === 1 ? "sm:border-l sm:border-gray-200 sm:pl-10" : "sm:pr-2"}
           >
-            {env === option && (
-              <motion.span
-                layoutId="security-toggle-active"
-                className="absolute inset-0 rounded-lg bg-[#2B5BC8]"
-                transition={{ duration: toggleDuration, ease }}
-                aria-hidden
-              />
-            )}
-            <span className={`relative z-10 ${env === option ? "text-white" : "text-gray-600"}`}>
-              {option === "local" ? "Local" : "VPC"}
-            </span>
-          </button>
+            <h4 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-gray-900">
+              {column.title}
+            </h4>
+            <ul className="mt-4 space-y-3.5">
+              {column.items.map((item) => (
+                <li key={item.label} className="flex items-start gap-2.5">
+                  <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden />
+                  <span className="text-[14px] leading-[1.45] text-gray-700">{item.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         ))}
-      </div>
-
-      <div className="mt-4 text-center">
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.p
-            key={env}
-            className="text-[13px] font-medium text-gray-500 leading-snug"
-            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: -4 }}
-            transition={{ duration: toggleDuration, ease }}
-          >
-            {status}
-          </motion.p>
-        </AnimatePresence>
       </div>
     </div>
   );
@@ -1373,8 +1337,8 @@ const pillarPanelCopy = {
     Visual: PillarAutomationVisual,
   },
   security: {
-    headline: "Your data never leaves your control",
-    sub: "You choose where it runs—locally or in your VPC. Your data stays there.",
+    headline: "You control your data",
+    sub: "Choose how your system runs. Your data stays where you decide.",
     Visual: PillarSecurityVisual,
   },
 };
@@ -1499,13 +1463,13 @@ const WhoItsForSection = () => {
           id={`pillar-panel-${pillar.id}`}
         >
           <div className="pillar-panel-gradient absolute inset-0 z-0 pointer-events-none" aria-hidden />
-          <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#95d7ff]/15 via-transparent to-[#7676df]/14 pointer-events-none" aria-hidden />
+          <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#3D6BFF]/20 via-transparent to-[#7C3AED]/14 pointer-events-none" aria-hidden />
           <div
-            className="absolute -right-20 -top-24 z-0 h-72 w-72 rounded-full bg-[#87c6ff]/22 blur-[64px] pointer-events-none"
+            className="absolute -right-20 -top-24 z-0 h-72 w-72 rounded-full bg-[#3D6BFF]/22 blur-[64px] pointer-events-none"
             aria-hidden
           />
           <div
-            className="absolute -bottom-28 -left-16 z-0 h-64 w-64 rounded-full bg-[#7a84e6]/20 blur-[56px] pointer-events-none"
+            className="absolute -bottom-28 -left-16 z-0 h-64 w-64 rounded-full bg-[#7C3AED]/16 blur-[56px] pointer-events-none"
             aria-hidden
           />
           <div
@@ -2087,7 +2051,7 @@ export default function Page() {
                     height: 810,
                     backgroundImage:
                       /* Soften the top-right highlight to avoid the "blue dot" look */
-                      "radial-gradient(360px 360px at 86% 25%, rgba(21,93,252,0.45) 0%, rgba(47,110,249,0.32) 16%, rgba(74,127,245,0.22) 32%, rgba(58,69,220,0.18) 52%, rgba(98,103,223,0.14) 60%, rgba(138,138,225,0.10) 66%, rgba(219,207,231,0.08) 76%, rgba(109,104,116,0.05) 86%, rgba(0,0,0,0) 97%), linear-gradient(137.33937931403239deg, rgb(230, 225, 236) 25%, rgba(111, 115, 175, 0.6) 45%, rgb(123, 143, 212) 70%, rgb(59, 79, 184) 100%)",
+                      "radial-gradient(420px 420px at 86% 24%, rgba(61,107,255,0.62) 0%, rgba(60,59,255,0.34) 22%, rgba(124,58,237,0.22) 44%, rgba(13,22,48,0.10) 70%, rgba(0,0,0,0) 92%), linear-gradient(137.33937931403239deg, rgb(235, 238, 255) 20%, rgba(60, 59, 255, 0.52) 46%, rgb(124, 58, 237) 78%, rgb(43, 91, 200) 100%)",
                   }}
                 >
                   <div
@@ -2121,7 +2085,7 @@ export default function Page() {
                     }
                     style={{
                       background:
-                        "linear-gradient(100deg, rgba(110,168,255,0) 0%, rgba(110,168,255,0.22) 32%, rgba(132,118,238,0.16) 56%, rgba(110,168,255,0) 100%)",
+                        "linear-gradient(100deg, rgba(61,107,255,0) 0%, rgba(61,107,255,0.28) 32%, rgba(124,58,237,0.22) 56%, rgba(61,107,255,0) 100%)",
                       borderRadius: "9999px",
                       filter: "blur(20px)",
                     }}
@@ -2311,7 +2275,7 @@ export default function Page() {
               style={{
                 backgroundImage:
                   /* Soften the top-right highlight to avoid the "blue dot" look */
-                  "radial-gradient(360px 360px at 86% 25%, rgba(21,93,252,0.45) 0%, rgba(47,110,249,0.32) 16%, rgba(74,127,245,0.22) 32%, rgba(58,69,220,0.18) 52%, rgba(98,103,223,0.14) 60%, rgba(138,138,225,0.10) 66%, rgba(219,207,231,0.08) 76%, rgba(109,104,116,0.05) 86%, rgba(0,0,0,0) 97%), linear-gradient(137.33937931403239deg, rgb(230, 225, 236) 25%, rgba(111, 115, 175, 0.6) 45%, rgb(123, 143, 212) 70%, rgb(59, 79, 184) 100%)",
+                  "radial-gradient(420px 420px at 86% 24%, rgba(61,107,255,0.62) 0%, rgba(60,59,255,0.34) 22%, rgba(124,58,237,0.22) 44%, rgba(13,22,48,0.10) 70%, rgba(0,0,0,0) 92%), linear-gradient(137.33937931403239deg, rgb(235, 238, 255) 20%, rgba(60, 59, 255, 0.52) 46%, rgb(124, 58, 237) 78%, rgb(43, 91, 200) 100%)",
               }}
               initial={heroVisualEnter}
               animate={{ opacity: 1, y: 0 }}
@@ -2344,7 +2308,7 @@ export default function Page() {
                 transition={reduceMotion ? { duration: 0 } : { duration: 0.95, delay: 0.24, ease: heroEase }}
                 style={{
                   background:
-                    "linear-gradient(100deg, rgba(110,168,255,0) 0%, rgba(110,168,255,0.22) 32%, rgba(132,118,238,0.16) 56%, rgba(110,168,255,0) 100%)",
+                    "linear-gradient(100deg, rgba(61,107,255,0) 0%, rgba(61,107,255,0.28) 32%, rgba(124,58,237,0.22) 56%, rgba(61,107,255,0) 100%)",
                   borderRadius: "9999px",
                   filter: "blur(20px)",
                 }}
@@ -2650,8 +2614,8 @@ export default function Page() {
                     style={{
                       background:
                         governanceEnv === "local"
-                          ? "radial-gradient(ellipse 40% 35% at 30% 30%, rgba(43, 91, 200, 0.18) 0%, rgba(43, 91, 200, 0) 60%), radial-gradient(ellipse 40% 35% at 80% 70%, rgba(76, 123, 234, 0.14) 0%, rgba(76, 123, 234, 0) 60%)"
-                          : "radial-gradient(ellipse 40% 35% at 70% 30%, rgba(63, 188, 149, 0.18) 0%, rgba(63, 188, 149, 0) 60%), radial-gradient(ellipse 40% 35% at 20% 70%, rgba(84, 179, 202, 0.14) 0%, rgba(84, 179, 202, 0) 60%)",
+                          ? "radial-gradient(ellipse 42% 36% at 30% 30%, rgba(61, 107, 255, 0.22) 0%, rgba(61, 107, 255, 0) 62%), radial-gradient(ellipse 42% 36% at 82% 72%, rgba(60, 59, 255, 0.18) 0%, rgba(60, 59, 255, 0) 62%)"
+                          : "radial-gradient(ellipse 42% 36% at 70% 30%, rgba(124, 58, 237, 0.22) 0%, rgba(124, 58, 237, 0) 62%), radial-gradient(ellipse 42% 36% at 20% 70%, rgba(61, 107, 255, 0.16) 0%, rgba(61, 107, 255, 0) 62%)",
                     }}
                   />
 
