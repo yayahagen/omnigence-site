@@ -26,13 +26,96 @@ import {
   GitBranch,
   Layers,
   Clock,
+  Database,
+  Cloud,
+  Coins,
   MousePointer2,
   Upload,
   Loader2,
   PenLine,
   ExternalLink,
+  ChevronDown,
 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+
+/* Structured dot grid — Stripe/Linear style: precise, static, gradient-faded */
+const DOT_GAP = 20;
+const DOT_RADIUS = 1.2;
+const DotGrid = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+
+    const draw = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      canvas.width = w * dpr;
+      canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+
+      const cols = Math.ceil(w / DOT_GAP) + 1;
+      const rows = Math.ceil(h / DOT_GAP) + 1;
+      const pad = DOT_GAP * 0.5; // centre the grid
+
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const x = pad + c * DOT_GAP;
+          const y = pad + r * DOT_GAP;
+
+          // Normalised position 0–1
+          const nx = x / w;
+          const ny = y / h;
+
+          // Two bright zones: bottom-left and top-right
+          const d1x = (nx - 0.18) / 0.22;
+          const d1y = (ny - 0.72) / 0.26;
+          const spot1 = Math.max(0, 1 - Math.sqrt(d1x * d1x + d1y * d1y));
+
+          const d2x = (nx - 0.82) / 0.22;
+          const d2y = (ny - 0.22) / 0.24;
+          const spot2 = Math.max(0, 1 - Math.sqrt(d2x * d2x + d2y * d2y));
+
+          const hotness = Math.max(spot1, spot2);
+
+          // Clear zone behind headline/CTA — no dots here
+          const hx = (nx - 0.5) / 0.32;
+          const hy = (ny - 0.40) / 0.25;
+          const inHeadline = Math.sqrt(hx * hx + hy * hy) < 1;
+          if (inHeadline) continue;
+
+          const floor = 0.05;
+          const peak = 0.45;
+          const alpha = floor + (peak - floor) * hotness * hotness;
+          if (alpha < 0.005) continue;
+
+          ctx.beginPath();
+          ctx.arc(x, y, DOT_RADIUS, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+          ctx.fill();
+        }
+      }
+    };
+
+    draw();
+
+    const ro = new ResizeObserver(draw);
+    ro.observe(canvas);
+    return () => { ro.disconnect(); };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="pointer-events-none absolute inset-0 h-full w-full"
+      aria-hidden="true"
+    />
+  );
+};
 
 const smoothScrollTo = (targetY, duration = 1200) => {
   const startY = window.scrollY;
@@ -72,13 +155,73 @@ const MultiAgentIcon = ({ className = "" }) => (
   </svg>
 );
 
-const btnBase = "inline-flex items-center justify-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2B5BC8]/50 focus-visible:ring-offset-2";
+const HERO_LEFT_GRID = "https://www.figma.com/api/mcp/asset/7dbad0a3-3458-47bd-b02f-d81883bb6c03";
+
+const HeroHeadlineWave = () => {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute -left-[185px] top-[430px] h-[390px] w-[520px] opacity-[0.24]"
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      animate={reduceMotion ? { opacity: 0.24 } : { opacity: 0.24, y: [0, -4, 0] }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { opacity: { duration: 0.6 }, y: { duration: 13, repeat: Infinity, ease: "easeInOut" } }
+      }
+      aria-hidden
+    >
+      <motion.img
+        src={HERO_LEFT_GRID}
+        alt=""
+        className="absolute inset-0 h-full w-full object-contain blur-[0.6px]"
+        animate={reduceMotion ? undefined : { x: [0, 8, -3, 0], y: [0, -5, 0], rotate: [0, 0.35, 0] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 16, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </motion.div>
+  );
+};
+
+const HeroHeadlineWaveTail = () => {
+  const reduceMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      className="pointer-events-none absolute -left-[185px] -top-[78px] hidden h-[300px] w-[520px] opacity-[0.16] lg:block"
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={reduceMotion ? { opacity: 0.16 } : { opacity: 0.16, y: [0, -3, 0] }}
+      transition={
+        reduceMotion
+          ? { duration: 0 }
+          : { opacity: { duration: 0.6 }, y: { duration: 13, repeat: Infinity, ease: "easeInOut" } }
+      }
+      style={{
+        maskImage:
+          "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.28) 18%, rgba(0,0,0,0.14) 42%, rgba(0,0,0,0.06) 68%, rgba(0,0,0,0) 100%)",
+        WebkitMaskImage:
+          "linear-gradient(to bottom, rgba(0,0,0,0.42) 0%, rgba(0,0,0,0.28) 18%, rgba(0,0,0,0.14) 42%, rgba(0,0,0,0.06) 68%, rgba(0,0,0,0) 100%)",
+      }}
+      aria-hidden
+    >
+      <motion.img
+        src={HERO_LEFT_GRID}
+        alt=""
+        className="absolute inset-0 h-full w-full object-contain blur-[0.6px]"
+        animate={reduceMotion ? undefined : { x: [0, 8, -3, 0], y: [0, -5, 0], rotate: [0, 0.35, 0] }}
+        transition={reduceMotion ? { duration: 0 } : { duration: 16, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </motion.div>
+  );
+};
+
+const btnBase = "inline-flex items-center justify-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6362CD]/50 focus-visible:ring-offset-2";
 
 const btnVariants = {
-  primary: `${btnBase} h-[46px] rounded-full bg-[#2B5BC8] px-6 text-white hover:bg-[#4C7BEA]`,
-  secondary: `${btnBase} h-[46px] rounded-full border border-gray-300 bg-transparent px-6 text-gray-800 hover:border-gray-400 hover:bg-gray-50`,
-  ghost: `${btnBase} text-[#2B5BC8] hover:underline underline-offset-4 decoration-[#2B5BC8]/40`,
-  navPrimary: `${btnBase} h-[38px] rounded-full bg-[#2B5BC8] px-5 text-white hover:bg-[#4C7BEA]`,
+  primary: `${btnBase} h-[38px] rounded-full bg-[#6362CD] px-5 text-white hover:bg-[#807FD9]`,
+  secondary: `${btnBase} h-[38px] rounded-full border border-gray-300 bg-transparent px-5 text-gray-800 hover:border-gray-400 hover:bg-gray-50`,
+  ghost: `${btnBase} text-[#6362CD] hover:underline underline-offset-4 decoration-[#6362CD]/40`,
+  navPrimary: `${btnBase} h-[46px] rounded-full bg-[#6362CD] px-5 text-white hover:bg-[#807FD9]`,
 };
 
 const Btn = ({ variant = "primary", href, children, className = "", ...props }) => {
@@ -104,7 +247,7 @@ const Card = ({ icon: Icon, title, desc, tag, href }) => (
       </div>
     )}
     <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-lg border border-gray-300 bg-[#f0faf9]">
-      <Icon className="h-5 w-5 text-[#2B5BC8]" />
+      <Icon className="h-5 w-5 text-[#6362CD]" />
     </div>
     <h3 className="mb-2 text-base font-semibold text-gray-900">{title}</h3>
     <p className="text-sm leading-relaxed text-gray-700">{desc}</p>
@@ -178,7 +321,7 @@ const UploadRequestDemo = () => {
     <div className="relative mt-4 inline-flex min-h-[42px] min-w-[9rem] items-center justify-center">
       {phase === "click" && (
         <motion.span
-          className="pointer-events-none absolute inset-0 -m-3 rounded-full bg-[#2B5BC8]/25"
+          className="pointer-events-none absolute inset-0 -m-3 rounded-full bg-[#6362CD]/25"
           initial={{ scale: 0.4, opacity: 0 }}
           animate={{ scale: 1.25, opacity: 0.45 }}
           transition={{ duration: 0.35 }}
@@ -186,7 +329,7 @@ const UploadRequestDemo = () => {
         />
       )}
       <motion.div
-        className="relative flex min-h-[42px] min-w-[9rem] items-center justify-center rounded-lg bg-[#2B5BC8] px-5 py-2.5 text-[13px] font-medium text-white shadow-md shadow-[#2B5BC8]/30"
+        className="relative flex min-h-[42px] min-w-[9rem] items-center justify-center rounded-lg bg-[#6362CD] px-5 py-2.5 text-[13px] font-medium text-white shadow-md shadow-[#6362CD]/30"
         animate={
           phase === "click"
             ? { scale: 0.93 }
@@ -214,7 +357,7 @@ const UploadRequestDemo = () => {
   const card = (
     <div className="w-full max-w-[380px] rounded-xl border border-white/70 bg-white/90 p-5 shadow-sm backdrop-blur-sm">
       <div className="rounded-lg border-2 border-dashed border-gray-200 bg-gray-50/60 px-4 py-7 text-center">
-        <Upload className="mx-auto mb-2 h-8 w-8 text-[#2B5BC8]" strokeWidth={1.5} aria-hidden />
+        <Upload className="mx-auto mb-2 h-8 w-8 text-[#6362CD]" strokeWidth={1.5} aria-hidden />
         <p className="text-[13px] text-gray-500">Drop a file or describe your request</p>
         {buttonBlock}
       </div>
@@ -357,7 +500,7 @@ const DataToDocumentDemo = () => {
       </div>
 
       <div className="flex shrink-0 items-center justify-center py-2 sm:w-11 sm:py-0" aria-hidden>
-        <ArrowRight className="h-8 w-8 text-[#2B5BC8] rotate-90 sm:rotate-0" strokeWidth={2} />
+        <ArrowRight className="h-8 w-8 text-[#6362CD] rotate-90 sm:rotate-0" strokeWidth={2} />
       </div>
 
       <div className="flex flex-1 flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-[0_8px_28px_rgba(0,0,0,0.08)]">
@@ -379,7 +522,7 @@ const DataToDocumentDemo = () => {
         </div>
         <div className="mt-2.5 flex justify-between border-t border-gray-200 pt-2 text-[12px] font-semibold text-gray-900">
           <span>Total</span>
-          <span className="tabular-nums text-[#2B5BC8]">$4,280.00</span>
+          <span className="tabular-nums text-[#6362CD]">$4,280.00</span>
         </div>
       </div>
     </div>
@@ -491,7 +634,7 @@ const DataToDocumentDemo = () => {
           transition={{ duration: 0.5, delay: 0.35, ease: howTransformEase }}
           aria-hidden
         >
-          <ArrowRight className="h-8 w-8 text-[#2B5BC8] rotate-90 sm:rotate-0" strokeWidth={2} />
+          <ArrowRight className="h-8 w-8 text-[#6362CD] rotate-90 sm:rotate-0" strokeWidth={2} />
         </motion.div>
 
         {/* Right — finished document (outcome) */}
@@ -516,7 +659,7 @@ const DataToDocumentDemo = () => {
                   y: [10, 0],
                   boxShadow: [
                     "0 4px 16px rgba(0,0,0,0.04)",
-                    "0 12px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(79,143,247,0.12)",
+                    "0 12px 40px rgba(0,0,0,0.1), 0 0 0 1px rgba(99,98,205,0.12)",
                   ],
                 }
               : { opacity: 0.35, scale: 0.97, y: 6 }
@@ -541,7 +684,7 @@ const DataToDocumentDemo = () => {
           </div>
           <div className="mt-2.5 flex justify-between border-t border-gray-200 pt-2 text-[12px] font-semibold text-gray-900">
             <span>Total</span>
-            <span className="tabular-nums text-[#2B5BC8]">$4,280.00</span>
+            <span className="tabular-nums text-[#6362CD]">$4,280.00</span>
           </div>
         </motion.div>
       </div>
@@ -646,7 +789,7 @@ const HowItWorks = () => {
         <div className="relative w-full max-w-[500px] lg:ml-auto lg:py-4">
           <div
             className="pointer-events-none relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl p-6 lg:min-h-[360px] lg:p-8"
-            style={{ background: "linear-gradient(145deg, #e1eeff 0%, #c6dbff 38%, #aabfff 72%, #b39cff 100%)" }}
+            style={{ background: "linear-gradient(145deg, #eef5ff 0%, #dce9ff 38%, #c7dbff 72%, #b8d3ff 100%)" }}
             aria-hidden="true"
           >
             <UploadRequestDemo />
@@ -659,7 +802,7 @@ const HowItWorks = () => {
         <div className="relative w-full max-w-[500px] order-2 lg:order-1 lg:py-4">
           <div
             className="pointer-events-none relative flex min-h-[320px] items-center justify-center overflow-hidden rounded-2xl p-6 lg:min-h-[360px] lg:p-8"
-            style={{ background: "linear-gradient(145deg, #e1eeff 0%, #c6dbff 38%, #aabfff 72%, #b39cff 100%)" }}
+            style={{ background: "linear-gradient(145deg, #eef5ff 0%, #dce9ff 38%, #c7dbff 72%, #b8d3ff 100%)" }}
             aria-hidden="true"
           >
             <DataToDocumentDemo />
@@ -687,12 +830,12 @@ const HowItWorks = () => {
         <div className="relative w-full max-w-[500px] lg:ml-auto lg:py-4">
           <div
             className="rounded-2xl p-6 min-h-[320px] lg:min-h-[360px] relative overflow-hidden flex flex-col justify-center gap-3"
-            style={{ background: "linear-gradient(145deg, #e1eeff 0%, #c6dbff 38%, #aabfff 72%, #b39cff 100%)" }}
+            style={{ background: "linear-gradient(145deg, #eef5ff 0%, #dce9ff 38%, #c7dbff 72%, #b8d3ff 100%)" }}
           >
             {/* Review queue cards — calm sequential approval flow */}
             <motion.div
               className={`rounded-xl bg-white/80 backdrop-blur-sm border border-white/60 shadow-sm p-4 flex items-start gap-3 relative ${
-                queueRunning && activeQueueIndex === 0 ? "outline outline-1 outline-[#2B5BC8]/20" : ""
+                queueRunning && activeQueueIndex === 0 ? "outline outline-1 outline-[#6362CD]/20" : ""
               }`}
               initial={
                 queueShouldAnimate
@@ -766,7 +909,7 @@ const HowItWorks = () => {
 
             <motion.div
               className={`rounded-xl bg-white/80 backdrop-blur-sm border border-white/60 shadow-sm p-4 flex items-start gap-3 relative ${
-                queueRunning && activeQueueIndex === 1 ? "outline outline-1 outline-[#2B5BC8]/20" : ""
+                queueRunning && activeQueueIndex === 1 ? "outline outline-1 outline-[#6362CD]/20" : ""
               }`}
               initial={
                 queueShouldAnimate
@@ -829,7 +972,7 @@ const HowItWorks = () => {
                     }}
                   />
                 )}
-                <Check className="h-4 w-4 text-[#2B5BC8]" strokeWidth={2} />
+                <Check className="h-4 w-4 text-[#6362CD]" strokeWidth={2} />
               </motion.div>
 
               <div className="flex-1 min-w-0">
@@ -840,7 +983,7 @@ const HowItWorks = () => {
 
             <motion.div
               className={`rounded-xl bg-white/80 backdrop-blur-sm border border-white/60 shadow-sm p-4 flex items-start gap-3 relative ${
-                queueRunning && activeQueueIndex === 2 ? "outline outline-1 outline-[#2B5BC8]/20" : ""
+                queueRunning && activeQueueIndex === 2 ? "outline outline-1 outline-[#6362CD]/20" : ""
               }`}
               initial={
                 queueShouldAnimate
@@ -957,7 +1100,7 @@ const PersonalizationDocCard = ({ ringStep = 3 }) => (
       {PILLAR_PERSONAL_FIELDS.map((row, i) => (
         <div key={row.id} className="relative rounded-xl px-3 py-3">
           <motion.div
-            className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-[#2B5BC8] ring-offset-2 ring-offset-white bg-[rgba(79,143,247,0.08)]"
+            className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-[#6362CD] ring-offset-2 ring-offset-white bg-[rgba(99,98,205,0.08)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: i < ringStep ? 1 : 0 }}
             transition={{ duration: 0.32, delay: i * 0.1, ease: pillarPersonalEase }}
@@ -1161,7 +1304,7 @@ const PillarAutomationVisual = () => {
     >
       <motion.div
         className={`pillar-content-card overflow-hidden min-h-[300px] sm:min-h-[340px] flex flex-col ${
-          step === 2 ? "ring-1 ring-[#2B5BC8]/20" : ""
+          step === 2 ? "ring-1 ring-[#6362CD]/20" : ""
         }`}
         animate={{
           borderColor:
@@ -1224,7 +1367,7 @@ const PillarAutomationVisual = () => {
               >
                 <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
                   <motion.div
-                    className="h-full rounded-full bg-[#2B5BC8]/75"
+                    className="h-full rounded-full bg-[#6362CD]/75"
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
                     transition={
@@ -1248,7 +1391,7 @@ const PillarAutomationVisual = () => {
                 <button
                   type="button"
                   tabIndex={-1}
-                  className="w-full rounded-lg bg-[#2B5BC8] px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm"
+                  className="w-full rounded-lg bg-[#6362CD] px-4 py-2.5 text-[13px] font-semibold text-white shadow-sm"
                 >
                   Approve
                 </button>
@@ -1277,48 +1420,150 @@ const PillarAutomationVisual = () => {
  * Static, scan-friendly decision layout with minimal chrome.
  */
 const PillarSecurityVisual = () => {
-  const columns = [
+  const reduceMotion = useReducedMotion();
+  const rootRef = useRef(null);
+  const inView = useInView(rootRef, { once: false, amount: 0.35, margin: "0px 0px -10% 0px" });
+  const rows = [
     {
-      title: "Local",
-      items: [
-        { icon: ShieldCheck, label: "You own your data" },
-        { icon: Layers, label: "Runs on your machine" },
-        { icon: Wallet, label: "No token usage or ongoing cost" },
-      ],
+      local: {
+        icon: Database,
+        label: "You own your data",
+        description: "Keep data inside your environment, under your policies and control.",
+      },
+      cloud: {
+        icon: ShieldCheck,
+        label: "Zero data retention",
+        description: "Process data without storing it after the work is done.",
+      },
     },
     {
-      title: "Cloud / VPC",
-      items: [
-        { icon: KeyRound, label: "Zero data retention" },
-        { icon: Unplug, label: "No infrastructure overhead" },
-        { icon: ShieldCheck, label: "Fully managed deployment" },
-      ],
+      local: {
+        icon: Coins,
+        label: "Save tokens",
+        description: "Run locally to avoid ongoing token usage and recurring cost.",
+      },
+      cloud: {
+        icon: Cloud,
+        label: "No overhead",
+        description: "Skip the setup, scaling, and maintenance work of managing infrastructure.",
+      },
+    },
+    {
+      local: {
+        icon: Layers,
+        label: "Runs on your machine",
+        description: "Deploy close to your team and systems in a self-contained setup.",
+      },
+      cloud: {
+        icon: KeyRound,
+        label: "Fully managed deployment",
+        description: "Run in the cloud or your VPC with managed operations already in place.",
+      },
     },
   ];
 
   return (
-    <div className="pillar-content-card w-full max-w-[640px] mx-auto p-6 sm:p-8" role="img" aria-label="Comparison of local and cloud or VPC deployment options">
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-10">
-        {columns.map((column, idx) => (
-          <div
-            key={column.title}
-            className={idx === 1 ? "sm:border-l sm:border-gray-200 sm:pl-10" : "sm:pr-2"}
+    <motion.div
+      ref={rootRef}
+      className="pillar-content-card w-full max-w-[700px] mx-auto px-4 py-5 sm:px-6 sm:py-6"
+      role="img"
+      aria-label="Comparison of local and cloud deployment options"
+      initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.985 }}
+      animate={inView ? { opacity: 1, y: 0, scale: 1 } : reduceMotion ? {} : { opacity: 0, y: 18, scale: 0.985 }}
+      transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className="grid grid-cols-[1fr_1px_1fr] items-end gap-x-5 sm:gap-x-8">
+        <motion.h4
+          className="pb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-gray-900"
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={inView ? { opacity: 1, y: 0 } : reduceMotion ? {} : { opacity: 0, y: 8 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.08 }}
+        >
+          local
+        </motion.h4>
+        <motion.div
+          className="self-stretch bg-gray-200"
+          aria-hidden
+          initial={reduceMotion ? false : { opacity: 0, scaleY: 0.4 }}
+          animate={inView ? { opacity: 1, scaleY: 1 } : reduceMotion ? {} : { opacity: 0, scaleY: 0.4 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.12 }}
+          style={{ originY: 0 }}
+        />
+        <motion.h4
+          className="pb-3 text-[13px] font-semibold uppercase tracking-[0.08em] text-gray-900"
+          initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+          animate={inView ? { opacity: 1, y: 0 } : reduceMotion ? {} : { opacity: 0, y: 8 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.12 }}
+        >
+          cloud
+        </motion.h4>
+      </div>
+
+      <div className="grid grid-cols-[1fr_1px_1fr] gap-x-5 sm:gap-x-8">
+        <motion.div
+          className="border-t border-dashed border-gray-200"
+          aria-hidden
+          initial={reduceMotion ? false : { opacity: 0, scaleX: 0.7 }}
+          animate={inView ? { opacity: 1, scaleX: 1 } : reduceMotion ? {} : { opacity: 0, scaleX: 0.7 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.16 }}
+          style={{ originX: 1 }}
+        />
+        <div className="bg-gray-200" aria-hidden />
+        <motion.div
+          className="border-t border-dashed border-gray-200"
+          aria-hidden
+          initial={reduceMotion ? false : { opacity: 0, scaleX: 0.7 }}
+          animate={inView ? { opacity: 1, scaleX: 1 } : reduceMotion ? {} : { opacity: 0, scaleX: 0.7 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.2 }}
+          style={{ originX: 0 }}
+        />
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {rows.map((row, index) => (
+          <motion.div
+            key={row.local.label}
+            className="grid grid-cols-1 gap-y-4 sm:grid-cols-[1fr_1px_1fr] sm:gap-x-8 sm:gap-y-0"
+            initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+            animate={inView ? { opacity: 1, y: 0 } : reduceMotion ? {} : { opacity: 0, y: 10 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.24 + index * 0.08 }}
           >
-            <h4 className="text-[13px] font-semibold uppercase tracking-[0.08em] text-gray-900">
-              {column.title}
-            </h4>
-            <ul className="mt-4 space-y-3.5">
-              {column.items.map((item) => (
-                <li key={item.label} className="flex items-start gap-2.5">
-                  <item.icon className="mt-0.5 h-4 w-4 shrink-0 text-gray-500" aria-hidden />
-                  <span className="text-[14px] leading-[1.45] text-gray-700">{item.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+            <div className="flex items-start gap-3">
+              <row.local.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gray-500" aria-hidden />
+              <div className="min-w-0">
+                <p className="text-[14px] font-medium leading-[1.35] text-gray-900">
+                  {row.local.label}
+                </p>
+                <p className="mt-1 text-[12.5px] leading-[1.5] text-gray-500">
+                  {row.local.description}
+                </p>
+              </div>
+            </div>
+
+            <motion.div
+              className="hidden self-stretch bg-gray-200 sm:block"
+              aria-hidden
+              initial={reduceMotion ? false : { opacity: 0, scaleY: 0.65 }}
+              animate={inView ? { opacity: 1, scaleY: 1 } : reduceMotion ? {} : { opacity: 0, scaleY: 0.65 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.3, delay: 0.26 + index * 0.08 }}
+              style={{ originY: 0 }}
+            />
+
+            <div className="flex items-start gap-3">
+              <row.cloud.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gray-500" aria-hidden />
+              <div className="min-w-0">
+                <p className="text-[14px] font-medium leading-[1.35] text-gray-900">
+                  {row.cloud.label}
+                </p>
+                <p className="mt-1 text-[12.5px] leading-[1.5] text-gray-500">
+                  {row.cloud.description}
+                </p>
+              </div>
+            </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -1432,9 +1677,9 @@ const WhoItsForSection = () => {
                     : { scale: 1.01, y: -1, transition: { duration: 0.2 } }
                 }
                 whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-                className={`relative flex flex-col flex-1 min-w-0 text-left rounded-2xl overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2B5BC8]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fafafa] ${
+                className={`relative flex flex-col flex-1 min-w-0 text-left rounded-2xl overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6362CD]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fafafa] ${
                   active
-                    ? "bg-white shadow-[0_4px_20px_rgba(0,0,0,0.07)] border border-black/[0.07] ring-1 ring-[#2B5BC8]/12"
+                    ? "bg-white shadow-[0_4px_20px_rgba(0,0,0,0.07)] border border-black/[0.07] ring-1 ring-[#6362CD]/12"
                     : "bg-[#F9FAFB] border border-[rgba(0,0,0,0.06)] hover:bg-[#f4f5f7]"
                 }`}
               >
@@ -1463,13 +1708,13 @@ const WhoItsForSection = () => {
           id={`pillar-panel-${pillar.id}`}
         >
           <div className="pillar-panel-gradient absolute inset-0 z-0 pointer-events-none" aria-hidden />
-          <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#3D6BFF]/20 via-transparent to-[#7C3AED]/14 pointer-events-none" aria-hidden />
+          <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#95d7ff]/15 via-transparent to-[#8ebcff]/12 pointer-events-none" aria-hidden />
           <div
             className="absolute -right-20 -top-24 z-0 h-72 w-72 rounded-full bg-[#3D6BFF]/22 blur-[64px] pointer-events-none"
             aria-hidden
           />
           <div
-            className="absolute -bottom-28 -left-16 z-0 h-64 w-64 rounded-full bg-[#7C3AED]/16 blur-[56px] pointer-events-none"
+            className="absolute -bottom-28 -left-16 z-0 h-64 w-64 rounded-full bg-[#a6c8ff]/18 blur-[56px] pointer-events-none"
             aria-hidden
           />
           <div
@@ -1634,7 +1879,7 @@ const SolutionsSection = () => {
               <div className="flex-1 min-h-0 w-full relative">
                 <div className="absolute left-0 top-0 w-px h-full bg-gray-200" />
                 <div
-                  className="absolute left-0 top-0 w-px bg-[#2B5BC8] transition-[height] duration-200 ease-out"
+                  className="absolute left-0 top-0 w-px bg-[#6362CD] transition-[height] duration-200 ease-out"
                   style={{ height: `${lineProgress * 100}%` }}
                 />
               </div>
@@ -1661,8 +1906,8 @@ const SolutionsSection = () => {
                           <ul className="space-y-1.5">
                             {feature.panel.workflowSteps.map((step, j) => (
                               <li key={j} className="flex items-center gap-2 text-sm text-gray-700">
-                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#d8e7ff]">
-                                  <Check className="h-3 w-3 text-[#2B5BC8]" />
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#e2e0f5]">
+                                  <Check className="h-3 w-3 text-[#6362CD]" />
                                 </span>
                                 {step}
                               </li>
@@ -1683,13 +1928,13 @@ const SolutionsSection = () => {
                     {/* Circle marker — every feature has one, aligned with top of content, on the line */}
                     <div
                       className={`absolute -left-8 md:-left-10 top-0 -translate-x-1/2 h-3 w-3 rounded-full shrink-0 z-10 transition-colors duration-300 ${
-                        isActive ? "bg-[#2B5BC8]" : "bg-gray-300"
+                        isActive ? "bg-[#6362CD]" : "bg-gray-300"
                       }`}
                       aria-hidden
                     />
                     <div className="flex items-center gap-2">
-                      <feature.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#2B5BC8]" : "text-gray-600"}`} />
-                      <span className={`text-xs font-medium uppercase tracking-wider ${isActive ? "text-[#2B5BC8]" : "text-gray-600"}`}>
+                      <feature.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-[#6362CD]" : "text-gray-600"}`} />
+                      <span className={`text-xs font-medium uppercase tracking-wider ${isActive ? "text-[#6362CD]" : "text-gray-600"}`}>
                         {feature.eyebrow}
                       </span>
                     </div>
@@ -1710,7 +1955,7 @@ const SolutionsSection = () => {
           <div className="hidden lg:block lg:sticky lg:top-24 lg:self-start">
             <div className="relative w-full max-w-[480px] mx-auto">
               <div className="absolute -inset-4 overflow-hidden rounded-2xl" aria-hidden>
-                <div className="absolute inset-0 bg-[#2B5BC8]" />
+                <div className="absolute inset-0 bg-[#6362CD]" />
               </div>
               <div className="relative rounded-xl border border-gray-300/60 bg-white shadow-lg overflow-hidden">
                 <div className="p-8 w-full max-w-[480px]">
@@ -1731,7 +1976,7 @@ const SolutionsSection = () => {
                           transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.1, 0.25, 1] }}
                         >
                           <div className="flex flex-col items-center shrink-0">
-                            <div className="w-px h-6 bg-[#2B5BC8]" />
+                            <div className="w-px h-6 bg-[#6362CD]" />
                             <FileText className="h-4 w-4 text-gray-500 mt-2 shrink-0" />
                           </div>
                           <div className="min-w-0">
@@ -1751,8 +1996,8 @@ const SolutionsSection = () => {
                           transition={{ duration: 0.4, delay: 0.5, ease: [0.25, 0.1, 0.25, 1] }}
                         >
                           <div className="flex flex-col items-center shrink-0">
-                            <Clock className="h-4 w-4 text-[#2B5BC8] shrink-0" />
-                            <div className="w-px flex-1 min-h-0 mt-2 border-l border-[#2B5BC8]/60" />
+                            <Clock className="h-4 w-4 text-[#6362CD] shrink-0" />
+                            <div className="w-px flex-1 min-h-0 mt-2 border-l border-[#6362CD]/60" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="text-[11px] font-medium uppercase tracking-wider text-gray-600 mb-4">AI workflow</div>
@@ -1765,7 +2010,7 @@ const SolutionsSection = () => {
                                   animate={{ opacity: 1, x: 0 }}
                                   transition={{ duration: 0.35, delay: 0.7 + i * 0.15, ease: "easeOut" }}
                                 >
-                                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#2B5BC8] mt-0.5">
+                                  <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6362CD] mt-0.5">
                                     <Check className="h-3 w-3 text-white" />
                                   </span>
                                   <span className="text-sm text-gray-700 leading-relaxed pt-0.5">{step}</span>
@@ -1786,7 +2031,7 @@ const SolutionsSection = () => {
                           transition={{ duration: 0.4, delay: 1.4, ease: [0.25, 0.1, 0.25, 1] }}
                         >
                           <div className="flex flex-col items-center shrink-0">
-                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#2B5BC8]">
+                            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#6362CD]">
                               <Check className="h-3 w-3 text-white" />
                             </span>
                           </div>
@@ -1808,7 +2053,7 @@ const SolutionsSection = () => {
                         >
                           <a
                             href="#contact"
-                            className="inline-flex h-9 items-center justify-center rounded-lg bg-[#d8e7ff] px-4 text-sm font-medium text-[#2B5BC8] hover:bg-[#d0e0ff] transition-colors"
+                            className="inline-flex h-9 items-center justify-center rounded-lg bg-[#e2e0f5] px-4 text-sm font-medium text-[#6362CD] hover:bg-[#d8d6f0] transition-colors"
                           >
                             {activeFeature.panel.buttons[0]}
                           </a>
@@ -1828,11 +2073,86 @@ const SolutionsSection = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <Btn href="#contact">
+          <Btn href="#contact" className="box-border w-[240px] px-5 text-sm whitespace-nowrap leading-none">
             Get started <ArrowRight className="h-4 w-4" />
           </Btn>
         </div>
       </div>
+    </section>
+  );
+};
+
+const FAQ_ITEMS = [
+  {
+    q: "How does Omnigence integrate with our existing tools?",
+    a: "Omnigence connects to your existing stack — documents, spreadsheets, cloud storage, and internal systems — through secure API integrations. No migration required. Your team keeps working the way they already do, with automation running underneath.",
+  },
+  {
+    q: "What kind of workflows can be automated?",
+    a: "Anything that follows a repeatable pattern: document processing, approval chains, data extraction, compliance checks, financial reconciliation, and more. If your team is doing it manually today, there's a good chance Omnigence can handle it.",
+  },
+  {
+    q: "Is our data secure?",
+    a: "Yes. Omnigence uses end-to-end encryption, role-based access controls, and a review-before-run model — meaning no action executes without human approval unless you explicitly allow it. Your data never leaves your environment without permission.",
+  },
+  {
+    q: "How long does it take to get started?",
+    a: "Most teams are up and running within a week. We handle onboarding, help configure your first workflows, and provide ongoing support. No lengthy implementation cycles.",
+  },
+];
+
+const FaqItem = ({ item, isOpen, onToggle }) => (
+  <div className="border-b border-gray-200 last:border-b-0">
+    <button
+      onClick={onToggle}
+      className="flex w-full items-center justify-between gap-4 py-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6362CD]/40 focus-visible:ring-offset-2 rounded-sm"
+    >
+      <span className="text-[17px] font-medium leading-snug text-gray-900">
+        {item.q}
+      </span>
+      <ChevronDown
+        className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+        strokeWidth={1.5}
+      />
+    </button>
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+          className="overflow-hidden"
+        >
+          <p className="max-w-[720px] pb-6 text-[15px] leading-[1.7] text-gray-500">
+            {item.a}
+          </p>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+
+const FaqSection = () => {
+  const [openIndex, setOpenIndex] = useState(0);
+
+  return (
+    <section className="bg-white py-24 md:py-28 lg:py-32">
+      <Container>
+        <h2 className="text-[1.65rem] font-normal leading-[1.25] tracking-tight text-gray-900 md:text-[2rem]">
+          Common questions
+        </h2>
+        <div className="mt-14">
+          {FAQ_ITEMS.map((item, i) => (
+            <FaqItem
+              key={i}
+              item={item}
+              isOpen={openIndex === i}
+              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
+            />
+          ))}
+        </div>
+      </Container>
     </section>
   );
 };
@@ -1864,13 +2184,13 @@ const Nav = () => {
           </a>
 
           <div className="hidden md:flex items-center justify-center gap-8">
-            <a href="#product" className="text-sm font-medium text-gray-700 transition-colors hover:text-[#2B5BC8]">
+            <a href="#product" className="text-sm font-medium text-gray-700 transition-colors hover:text-[#6362CD]">
               Product
             </a>
-            <a href="#how" className="text-sm font-medium text-gray-700 transition-colors hover:text-[#2B5BC8]">
+            <a href="#how" className="text-sm font-medium text-gray-700 transition-colors hover:text-[#6362CD]">
               How it works
             </a>
-            <a href="#governance" className="text-sm font-medium text-gray-700 transition-colors hover:text-[#2B5BC8]">
+            <a href="#governance" className="text-sm font-medium text-gray-700 transition-colors hover:text-[#6362CD]">
               Security
             </a>
           </div>
@@ -1878,7 +2198,7 @@ const Nav = () => {
           <div className="flex items-center justify-self-end">
             <span className="nav-cta-glow inline-flex">
               <Btn variant="navPrimary" href="#contact" className="relative z-[1]">
-                Book a Demo
+                Request a Demo
               </Btn>
             </span>
           </div>
@@ -1899,7 +2219,7 @@ const HERO_FINANCE_METRICS = {
   expenses: 28340,
   profit: 14240,
 };
-const HERO_PANEL_TEXTURE = "https://www.figma.com/api/mcp/asset/42a5cee3-c627-4636-973a-1f2b6bb0ee1d";
+const HERO_PANEL_TEXTURE = "https://www.figma.com/api/mcp/asset/5d172ce2-9311-475e-9dd3-15fb0d666dc5";
 
 const useCountUp = ({ target, durationMs, start }) => {
   const [value, setValue] = useState(start ? 0 : target);
@@ -1934,8 +2254,6 @@ export default function Page() {
   const reduceMotion = useReducedMotion();
   const [heroNumbersStart, setHeroNumbersStart] = useState(false);
   const [heroMounted, setHeroMounted] = useState(false);
-  const [governanceEnv, setGovernanceEnv] = useState("local");
-  const [governanceUserControlled, setGovernanceUserControlled] = useState(false);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -1950,15 +2268,6 @@ export default function Page() {
   useEffect(() => {
     setHeroMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (reduceMotion) return undefined;
-    if (governanceUserControlled) return undefined;
-    const id = window.setInterval(() => {
-      setGovernanceEnv((prev) => (prev === "local" ? "vpc" : "local"));
-    }, 2200);
-    return () => window.clearInterval(id);
-  }, [reduceMotion, governanceUserControlled]);
 
   const shouldAnimateHeroNumbers = heroNumbersStart && !reduceMotion;
   const animatedRevenue = useCountUp({
@@ -2027,14 +2336,14 @@ export default function Page() {
               <div className="mt-8 flex items-center gap-3">
                 <a
                   href="#how"
-                  className="inline-flex box-border h-[38px] w-[240px] items-center justify-center gap-2 rounded-full bg-[#2B5BC8] px-5 py-0 text-sm font-medium leading-none text-white hover:bg-[#4C7BEA] transition-colors"
+                  className="inline-flex box-border h-[46px] w-[240px] items-center justify-center gap-2 rounded-full bg-[#6362CD] px-5 py-0 text-sm font-medium leading-none text-white hover:bg-[#807FD9] transition-colors"
                 >
                   See How It Works <ArrowRight className="h-4 w-4" />
                 </a>
                 <Btn
                   href="/api"
                   variant="secondary"
-                  className="box-border h-[38px] w-[240px] px-5 text-sm whitespace-nowrap leading-none"
+                  className="box-border h-[46px] w-[240px] px-5 text-sm whitespace-nowrap leading-none"
                 >
                   Explore API <ArrowRight className="h-4 w-4" />
                 </Btn>
@@ -2050,12 +2359,11 @@ export default function Page() {
                     width: 879,
                     height: 810,
                     backgroundImage:
-                      /* Soften the top-right highlight to avoid the "blue dot" look */
-                      "radial-gradient(420px 420px at 86% 24%, rgba(61,107,255,0.62) 0%, rgba(60,59,255,0.34) 22%, rgba(124,58,237,0.22) 44%, rgba(13,22,48,0.10) 70%, rgba(0,0,0,0) 92%), linear-gradient(137.33937931403239deg, rgb(235, 238, 255) 20%, rgba(60, 59, 255, 0.52) 46%, rgb(124, 58, 237) 78%, rgb(43, 91, 200) 100%)",
+                      "radial-gradient(240px 240px at 94% 11%, rgba(21,93,252,0.52) 0%, rgba(47,110,249,0.42) 18%, rgba(74,127,245,0.30) 34%, rgba(58,69,220,0.16) 56%, rgba(98,103,223,0.10) 66%, rgba(138,138,225,0.06) 74%, rgba(0,0,0,0) 92%), linear-gradient(137.33937931403239deg, rgb(230, 225, 236) 25%, rgba(111, 115, 175, 0.6) 45%, rgb(123, 143, 212) 70%, rgb(59, 79, 184) 100%)",
                   }}
                 >
                   <div
-                    className="pointer-events-none absolute inset-0 opacity-[0.02]"
+                    className="pointer-events-none absolute inset-0 opacity-[0.03]"
                     style={{
                       backgroundImage: `url("${HERO_PANEL_TEXTURE}")`,
                       backgroundSize: "220px 220px",
@@ -2066,10 +2374,9 @@ export default function Page() {
                   <div
                     className="pointer-events-none absolute inset-0"
                     style={{
-                      /* Removed the extra big radial blotch.
-                         We keep only the primary gradient + texture layers for a smoother premium look. */
-                      background: "transparent",
-                      filter: "none",
+                      background:
+                        "radial-gradient(ellipse 16% 18% at 89% 14%, rgba(111,175,165,0.10) 0%, rgba(56,88,83,0.05) 34%, rgba(0,0,0,0) 62%)",
+                      filter: "blur(52px)",
                     }}
                     aria-hidden
                   />
@@ -2085,13 +2392,51 @@ export default function Page() {
                     }
                     style={{
                       background:
-                        "linear-gradient(100deg, rgba(61,107,255,0) 0%, rgba(61,107,255,0.28) 32%, rgba(124,58,237,0.22) 56%, rgba(61,107,255,0) 100%)",
+                        "linear-gradient(100deg, rgba(110,168,255,0) 0%, rgba(110,168,255,0.22) 32%, rgba(132,118,238,0.16) 56%, rgba(110,168,255,0) 100%)",
                       borderRadius: "9999px",
                       filter: "blur(20px)",
                     }}
                   />
+                  {/* Upload */}
+                  <div className="absolute left-[104px] top-[110px] w-[220px] h-[68px] bg-[#0e0c0c] rounded-[16px] shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] flex items-center justify-center px-[24px]">
+                    <p className="text-[14px] font-medium text-white leading-[normal] text-center">
+                      Upload Files
+                    </p>
+                  </div>
+
+                  {/* Structured Business Data */}
+                  <div className="absolute left-[104px] top-[192px] w-[220px] h-[68px] bg-[#807FD9] rounded-[16px] shadow-[0_12px_18px_rgba(0,0,0,0.14),0_4px_8px_rgba(0,0,0,0.1)] flex items-center justify-center px-[24px]">
+                    <p className="text-[14px] font-medium text-white leading-[normal] text-center">
+                      Structured Business Data
+                    </p>
+                  </div>
+
+                  {/* Arrow icon between cards */}
+                  <div
+                    className="absolute left-[194px] top-[163px] z-20 flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white text-[#0e0c0c] shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
+                    aria-hidden
+                  >
+                    <ArrowDown className="h-5 w-5" strokeWidth={1.9} />
+                  </div>
+
+                  {/* Warning card */}
+                  <div className="absolute left-[104px] top-[302px] w-[317px] h-[77px] bg-white rounded-[13px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] flex items-center px-[14px] gap-[12px]">
+                    <AlertTriangle className="h-10 w-10 shrink-0 text-amber-500" strokeWidth={1.75} aria-hidden />
+                    <div className="flex-1">
+                      <div className="text-[15px] font-medium text-[#343744] leading-[20px]">
+                        2 discrepancies flagged
+                      </div>
+                      <div className="mt-[4px] text-[10px] font-normal text-[#696969] leading-[12px]">
+                        Bankbook and statement mismatch detected
+                      </div>
+                      <div className="mt-[6px] text-[8px] font-normal text-[#6362CD]">
+                        Review Discrepancies &rarr;
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Approval card */}
-                  <div className="absolute left-[270px] top-[98px] w-[313px] h-[200px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-[18px]">
+                  <div className="absolute left-[388px] top-[118px] w-[313px] h-[200px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-[18px]">
                     <div className="flex flex-col gap-[3px]">
                       <div className="text-[14px] font-medium text-[#101828]">AI Task Completed</div>
                       <div className="text-[10px] font-normal text-[#6a7282]">Weekly Reconciliation</div>
@@ -2099,11 +2444,11 @@ export default function Page() {
 
                     <div className="mt-[14px] flex flex-col gap-[10px]">
                       <div className="flex items-center gap-[9px]">
-                        <Check className="h-[14px] w-[14px] shrink-0 text-[#2B5BC8]" strokeWidth={2.5} aria-hidden />
+                        <Check className="h-[14px] w-[14px] shrink-0 text-[#6362CD]" strokeWidth={2.5} aria-hidden />
                         <div className="text-[11px] font-normal text-[#364153]">48 transactions matched</div>
                       </div>
                       <div className="flex items-center gap-[9px]">
-                        <Check className="h-[14px] w-[14px] shrink-0 text-[#2B5BC8]" strokeWidth={2.5} aria-hidden />
+                        <Check className="h-[14px] w-[14px] shrink-0 text-[#6362CD]" strokeWidth={2.5} aria-hidden />
                         <div className="flex-1 text-[11px] font-normal text-[#364153]">
                           Bankbook vs statement reconciliation completed
                         </div>
@@ -2115,7 +2460,7 @@ export default function Page() {
                     <div className="mt-[10px] flex gap-[10px]">
                       <button
                         type="button"
-                        className="flex-1 h-[26px] rounded-[6px] bg-[#2B5BC8] text-white text-[10px] font-medium"
+                        className="flex-1 h-[26px] rounded-[6px] bg-[#6362CD] text-white text-[10px] font-medium"
                       >
                         Approve
                       </button>
@@ -2128,31 +2473,15 @@ export default function Page() {
                     </div>
                   </div>
 
-                  {/* Warning card */}
-                  <div className="absolute left-[92px] top-[318px] w-[317px] h-[77px] bg-white rounded-[13px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] flex items-center px-[14px] gap-[12px]">
-                    <AlertTriangle className="h-10 w-10 shrink-0 text-amber-500" strokeWidth={1.75} aria-hidden />
-                    <div className="flex-1">
-                      <div className="text-[15px] font-medium text-[#343744] leading-[20px]">
-                        2 discrepancies flagged
-                      </div>
-                      <div className="mt-[4px] text-[10px] font-normal text-[#696969] leading-[12px]">
-                        Bankbook and statement mismatch detected
-                      </div>
-                      <div className="mt-[6px] text-[8px] font-normal text-[#2B5BC8]">
-                        Review Discrepancies &rarr;
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Financial summary card */}
-                  <div className="absolute left-[420px] top-[318px] w-[318px] h-[384px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-[19px] flex flex-col gap-[12px]">
+                  <div className="absolute left-[420px] top-[348px] w-[318px] h-[384px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] p-[19px] flex flex-col gap-[12px]">
                     <div className="flex justify-end">
                       <div className="bg-[#f3f4f6] rounded-[10px] px-[12px] py-[8px] text-[12px] font-normal text-[#101828] whitespace-nowrap">
                         Generate financial summary for March.
                       </div>
                     </div>
                     <div className="flex justify-end">
-                      <div className="bg-[#eff6ff] rounded-[10px] px-[12px] py-[8px] text-[12px] font-normal text-[#101828] whitespace-nowrap">
+                      <div className="bg-[#eeedfa] rounded-[10px] px-[12px] py-[8px] text-[12px] font-normal text-[#101828] whitespace-nowrap">
                         Financial summary ready.
                       </div>
                     </div>
@@ -2180,7 +2509,7 @@ export default function Page() {
                           <path
                             d="M10 90 C 34 94, 50 92, 72 80 C 92 69, 112 72, 132 70 C 152 68, 170 58, 188 54 C 206 50, 220 40, 232 30"
                             fill="none"
-                            stroke="#2B5BC8"
+                            stroke="#6362CD"
                             strokeWidth="2.4"
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -2191,34 +2520,13 @@ export default function Page() {
 
                     <a
                       href="#solutions"
-                      className="mt-[6px] pt-[6px] border-t border-gray-200 flex items-center gap-[10px] text-[11px] font-medium text-[#2B5BC8]"
+                      className="mt-[6px] pt-[6px] border-t border-gray-200 flex items-center gap-[10px] text-[11px] font-medium text-[#6362CD]"
                     >
                       <span>View full report</span>
-                      <ExternalLink className="h-3 w-3 shrink-0 text-[#2B5BC8]" strokeWidth={2} aria-hidden />
+                      <ExternalLink className="h-3 w-3 shrink-0 text-[#6362CD]" strokeWidth={2} aria-hidden />
                     </a>
                   </div>
 
-                  {/* Upload */}
-                  <div className="absolute left-[186px] top-[438px] w-[220px] h-[68px] bg-[#0e0c0c] rounded-[16px] shadow-[0_10px_15px_rgba(0,0,0,0.1),0_4px_6px_rgba(0,0,0,0.1)] flex items-center justify-center px-[24px]">
-                    <p className="text-[14px] font-medium text-white leading-[normal] text-center">
-                      Upload Files
-                    </p>
-                  </div>
-
-                  {/* Structured Business Data */}
-                  <div className="absolute left-[186px] top-[520px] w-[220px] h-[68px] bg-[#4C7BEA] rounded-[16px] shadow-[0_12px_18px_rgba(0,0,0,0.14),0_4px_8px_rgba(0,0,0,0.1)] flex items-center justify-center px-[24px]">
-                    <p className="text-[14px] font-medium text-white leading-[normal] text-center">
-                      Structured Business Data
-                    </p>
-                  </div>
-
-                  {/* Arrow icon between cards */}
-                  <div
-                    className="absolute left-[280px] top-[496px] z-20 flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white text-[#0e0c0c] shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
-                    aria-hidden
-                  >
-                    <ArrowDown className="h-5 w-5" strokeWidth={1.9} />
-                  </div>
                 </div>
               </div>
             </div>
@@ -2231,7 +2539,7 @@ export default function Page() {
             {/* Left headline + CTA — aligned with navbar via calc */}
             <div className="absolute left-[max(calc((100%-1280px)/2+24px),24px)] top-1/2 -translate-y-[55%] z-10 max-w-[400px]">
               <motion.h1
-                className="font-medium text-[42px] leading-[1.1] tracking-[-0.02em] text-[#0e0c0c]"
+                className="relative z-[1] font-medium text-[42px] leading-[1.1] tracking-[-0.02em] text-[#0e0c0c]"
                 initial={heroTextEnter}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.02, ease: heroEase }}
@@ -2239,7 +2547,7 @@ export default function Page() {
                 An AI agent you can train to run your operations
               </motion.h1>
               <motion.p
-                className="mt-6 text-[16px] leading-[1.6] text-[#0e0c0c]/60 max-w-[340px]"
+                className="relative z-[1] mt-6 text-[16px] leading-[1.6] text-[#0e0c0c]/60 max-w-[340px]"
                 initial={heroTextEnter}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.48, delay: 0.1, ease: heroEase }}
@@ -2247,7 +2555,7 @@ export default function Page() {
                 Turn documents, approvals, and company knowledge into automated workflows.
               </motion.p>
               <motion.div
-                className="mt-10 flex items-center gap-3"
+                className="relative z-[1] mt-10 flex items-center gap-3"
                 initial={heroTextEnter}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.48, delay: 0.18, ease: heroEase }}
@@ -2262,11 +2570,12 @@ export default function Page() {
                 <Btn
                   href="/api"
                   variant="secondary"
-                  className="box-border h-[38px] w-[240px] px-5 text-sm whitespace-nowrap leading-none"
+                  className="box-border h-[46px] w-[240px] px-5 text-sm whitespace-nowrap leading-none"
                 >
                   Explore API <ArrowRight className="h-4 w-4" />
                 </Btn>
               </motion.div>
+              <HeroHeadlineWave />
             </div>
 
             {/* Gradient panel — height 750px so 82 + 750 = 832px; avoids overflow clip / angled edge at section bottom */}
@@ -2274,15 +2583,14 @@ export default function Page() {
               className="absolute left-[633px] top-[82px] w-[879px] h-[750px] rounded-bl-[28px] rounded-tl-[28px] overflow-hidden"
               style={{
                 backgroundImage:
-                  /* Soften the top-right highlight to avoid the "blue dot" look */
-                  "radial-gradient(420px 420px at 86% 24%, rgba(61,107,255,0.62) 0%, rgba(60,59,255,0.34) 22%, rgba(124,58,237,0.22) 44%, rgba(13,22,48,0.10) 70%, rgba(0,0,0,0) 92%), linear-gradient(137.33937931403239deg, rgb(235, 238, 255) 20%, rgba(60, 59, 255, 0.52) 46%, rgb(124, 58, 237) 78%, rgb(43, 91, 200) 100%)",
+                  "radial-gradient(240px 240px at 94% 11%, rgba(21,93,252,0.52) 0%, rgba(47,110,249,0.42) 18%, rgba(74,127,245,0.30) 34%, rgba(58,69,220,0.16) 56%, rgba(98,103,223,0.10) 66%, rgba(138,138,225,0.06) 74%, rgba(0,0,0,0) 92%), linear-gradient(137.33937931403239deg, rgb(230, 225, 236) 25%, rgba(111, 115, 175, 0.6) 45%, rgb(123, 143, 212) 70%, rgb(59, 79, 184) 100%)",
               }}
               initial={heroVisualEnter}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.55, delay: 0.22, ease: heroEase }}
             >
               <div
-                className="pointer-events-none absolute inset-0 opacity-[0.02]"
+                className="pointer-events-none absolute inset-0 opacity-[0.03]"
                 style={{
                   backgroundImage: `url("${HERO_PANEL_TEXTURE}")`,
                   backgroundSize: "220px 220px",
@@ -2293,10 +2601,9 @@ export default function Page() {
               <div
                 className="pointer-events-none absolute inset-0"
                 style={{
-                      /* Removed the extra big radial blotch.
-                         We keep only the primary gradient + texture layers for a smoother premium look. */
-                      background: "transparent",
-                      filter: "none",
+                      background:
+                        "radial-gradient(ellipse 16% 18% at 89% 14%, rgba(111,175,165,0.10) 0%, rgba(56,88,83,0.05) 34%, rgba(0,0,0,0) 62%)",
+                      filter: "blur(52px)",
                 }}
                 aria-hidden
               />
@@ -2308,19 +2615,119 @@ export default function Page() {
                 transition={reduceMotion ? { duration: 0 } : { duration: 0.95, delay: 0.24, ease: heroEase }}
                 style={{
                   background:
-                    "linear-gradient(100deg, rgba(61,107,255,0) 0%, rgba(61,107,255,0.28) 32%, rgba(124,58,237,0.22) 56%, rgba(61,107,255,0) 100%)",
+                    "linear-gradient(100deg, rgba(110,168,255,0) 0%, rgba(110,168,255,0.22) 32%, rgba(132,118,238,0.16) 56%, rgba(110,168,255,0) 100%)",
                   borderRadius: "9999px",
                   filter: "blur(20px)",
                 }}
               />
             </motion.div>
 
-            {/* Approval panel card */}
+            {/* Flow connector lines */}
+            <svg
+              className="pointer-events-none absolute left-0 top-0 h-full w-full"
+              fill="none"
+              aria-hidden
+            >
+              {/* Structured Business Data → Discrepancies Flagged */}
+              <motion.path
+                d="M 1056 365 C 1068 365, 1068 248, 1082 248"
+                stroke="rgba(255,255,255,0.25)"
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
+                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.58, ease: heroEase }}
+              />
+              {/* Structured Business Data → AI Task Completed */}
+              <motion.path
+                d="M 946 428 C 946 443, 900 451, 900 451"
+                stroke="rgba(255,255,255,0.25)"
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
+                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.74, ease: heroEase }}
+              />
+              {/* AI Task Completed → Financial Summary */}
+              <motion.path
+                d="M 1056 551 C 1068 551, 1068 514, 1082 514"
+                stroke="rgba(255,255,255,0.25)"
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
+                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: 1.0, ease: heroEase }}
+              />
+              {/* Discrepancies Flagged → Financial Summary */}
+              <motion.path
+                d="M 1240 287 C 1240 303, 1240 322, 1240 322"
+                stroke="rgba(255,255,255,0.25)"
+                strokeWidth={1.2}
+                strokeDasharray="4 3"
+                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
+                animate={{ pathLength: 1, opacity: 1 }}
+                transition={{ duration: 0.4, delay: 1.0, ease: heroEase }}
+              />
+            </svg>
+
+            {/* Upload / structured buttons */}
             <motion.div
-              className="absolute left-[926px] top-[178px] w-[313px] h-[200px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)] p-[18px]"
-              initial={heroCardEnter}
+              className="absolute left-[836px] top-[278px] w-[220px] h-[68px] bg-[#0e0c0c] rounded-[16px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)] flex items-center justify-center text-center px-[24px]"
+              initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.48, delay: 0.34, ease: heroEase }}
+              transition={{ duration: 0.42, delay: 0.28, ease: heroEase }}
+            >
+              <p className="text-[14px] font-medium text-white leading-[normal]">
+                Upload Files
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="absolute left-[836px] top-[360px] w-[220px] h-[68px] bg-[#3b4fb8] rounded-[16px] shadow-[0_12px_18px_rgba(0,0,0,0.14),0_4px_8px_rgba(0,0,0,0.1)] flex items-center justify-center text-center px-[24px]"
+              initial={reduceMotion ? false : { opacity: 0, y: 18, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.42, delay: 0.48, ease: heroEase }}
+            >
+              <p className="text-[14px] font-medium text-white leading-[normal]">
+                Structured Business Data
+              </p>
+            </motion.div>
+
+            <motion.div
+              className="absolute left-[931px] top-[336px] z-20 flex h-[31px] w-[31px] items-center justify-center rounded-full bg-white text-[#0e0c0c] shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.28, delay: 0.58, ease: heroEase }}
+              aria-hidden
+            >
+              <ArrowDown className="h-4 w-4" strokeWidth={1.9} />
+            </motion.div>
+
+            <motion.div
+              className="absolute left-[1082px] top-[210px] w-[317px] h-[77px] bg-white rounded-[13px] shadow-[0px_3px_11px_rgba(0,0,0,0.08)] flex items-center justify-center px-[14px] gap-[12px]"
+              initial={reduceMotion ? false : { opacity: 0, x: -16, scale: 0.985 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.42, delay: 0.74, ease: heroEase }}
+            >
+              <AlertTriangle className="h-10 w-10 shrink-0 text-amber-500" strokeWidth={1.75} aria-hidden />
+              <div className="flex-1">
+                <div className="text-[15px] font-medium text-[#343744] leading-[20px]">
+                  2 discrepancies flagged
+                </div>
+                <div className="mt-[4px] text-[10px] font-normal text-[#696969] leading-[12px]">
+                  Bankbook and statement mismatch detected
+                </div>
+                <div className="mt-[6px] text-[8px] font-normal text-[#6362CD]">
+                  Review Discrepancies &rarr;
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              className="absolute left-[743px] top-[451px] w-[313px] h-[200px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)] p-[18px]"
+              initial={reduceMotion ? false : { opacity: 0, x: 18, scale: 0.985 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              transition={{ duration: 0.46, delay: 0.94, ease: heroEase }}
             >
               <div className="flex flex-col gap-[3px]">
                 <div className="text-[14px] font-medium text-[#101828]">AI Task Completed</div>
@@ -2329,13 +2736,13 @@ export default function Page() {
 
               <div className="mt-[14px] flex flex-col gap-[10px]">
                 <div className="flex items-center gap-[9px]">
-                  <Check className="h-[14px] w-[14px] shrink-0 text-[#2B5BC8]" strokeWidth={2.5} aria-hidden />
+                  <Check className="h-[14px] w-[14px] shrink-0 text-[#6362CD]" strokeWidth={2.5} aria-hidden />
                   <div className="text-[11px] font-normal text-[#364153]">
                     48 transactions matched
                   </div>
                 </div>
                 <div className="flex items-center gap-[9px]">
-                  <Check className="h-[14px] w-[14px] shrink-0 text-[#2B5BC8]" strokeWidth={2.5} aria-hidden />
+                  <Check className="h-[14px] w-[14px] shrink-0 text-[#6362CD]" strokeWidth={2.5} aria-hidden />
                   <div className="flex-1 text-[11px] font-normal text-[#364153]">
                     Bankbook vs statement reconciliation completed
                   </div>
@@ -2347,7 +2754,7 @@ export default function Page() {
               <div className="mt-[10px] flex gap-[10px]">
                 <button
                   type="button"
-                  className="flex-1 h-[26px] rounded-[6px] bg-[#2B5BC8] text-white text-[10px] font-medium"
+                  className="flex-1 h-[26px] rounded-[6px] bg-[#009966] text-white text-[10px] font-medium"
                 >
                   Approve
                 </button>
@@ -2360,33 +2767,11 @@ export default function Page() {
               </div>
             </motion.div>
 
-            {/* Warning card */}
             <motion.div
-              className="absolute left-[747px] top-[400px] w-[317px] h-[77px] bg-white rounded-[13px] shadow-[0px_3px_11px_rgba(0,0,0,0.08)] flex items-center justify-center px-[14px] gap-[12px]"
-              initial={heroCardEnter}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.46, delay: 0.5, ease: heroEase }}
-            >
-              <AlertTriangle className="h-10 w-10 shrink-0 text-amber-500" strokeWidth={1.75} aria-hidden />
-              <div className="flex-1">
-                <div className="text-[15px] font-medium text-[#343744] leading-[20px]">
-                  2 discrepancies flagged
-                </div>
-                <div className="mt-[4px] text-[10px] font-normal text-[#696969] leading-[12px]">
-                  Bankbook and statement mismatch detected
-                </div>
-                <div className="mt-[6px] text-[8px] font-normal text-[#2B5BC8]">
-                  Review Discrepancies &rarr;
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Financial summary panel */}
-            <motion.div
-              className="absolute left-[1082px] top-[400px] w-[318px] h-[384px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)] p-[19px] flex flex-col gap-[12px]"
-              initial={heroCardEnter}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.52, delay: 0.78, ease: heroEase }}
+              className="absolute left-[1082px] top-[322px] w-[318px] h-[384px] bg-white border border-[#f3f4f6] rounded-[16px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)] p-[19px] flex flex-col gap-[12px]"
+              initial={reduceMotion ? false : { opacity: 0, y: 22, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.52, delay: 1.18, ease: heroEase }}
             >
               <div className="flex justify-end">
                 <div className="bg-[#f3f4f6] rounded-[10px] px-[12px] py-[8px] text-[12px] font-normal text-[#101828] whitespace-nowrap">
@@ -2394,7 +2779,7 @@ export default function Page() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <div className="bg-[#eff6ff] rounded-[10px] px-[12px] py-[8px] text-[12px] font-normal text-[#101828] whitespace-nowrap">
+                <div className="bg-[#eeedfa] rounded-[10px] px-[12px] py-[8px] text-[12px] font-normal text-[#101828] whitespace-nowrap">
                   Financial summary ready.
                 </div>
               </div>
@@ -2422,7 +2807,7 @@ export default function Page() {
                     <motion.path
                       d="M10 90 C 34 94, 50 92, 72 80 C 92 69, 112 72, 132 70 C 152 68, 170 58, 188 54 C 206 50, 220 40, 232 30"
                       fill="none"
-                      stroke="#2B5BC8"
+                      stroke="#6362CD"
                       strokeWidth="2.4"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -2436,44 +2821,11 @@ export default function Page() {
 
               <a
                 href="#solutions"
-                className="mt-[6px] pt-[6px] border-t border-gray-200 flex items-center gap-[10px] text-[11px] font-medium text-[#2B5BC8]"
+                className="mt-[6px] pt-[6px] border-t border-gray-200 flex items-center gap-[10px] text-[11px] font-medium text-[#6362CD]"
               >
                 <span>View full report</span>
-                <ExternalLink className="h-3 w-3 shrink-0 text-[#2B5BC8]" strokeWidth={2} aria-hidden />
+                <ExternalLink className="h-3 w-3 shrink-0 text-[#6362CD]" strokeWidth={2} aria-hidden />
               </a>
-            </motion.div>
-
-            {/* Upload / structured buttons */}
-            <motion.div
-              className="absolute left-[844px] top-[520px] w-[220px] h-[68px] bg-[#0e0c0c] rounded-[16px] shadow-[0px_10px_15px_rgba(0,0,0,0.1),0px_4px_6px_rgba(0,0,0,0.1)] flex items-center justify-center text-center px-[24px]"
-              initial={heroCardEnter}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.62, ease: heroEase }}
-            >
-              <p className="text-[14px] font-medium text-white leading-[normal]">
-                Upload Files
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="absolute left-[844px] top-[602px] w-[220px] h-[68px] bg-[#4C7BEA] rounded-[16px] shadow-[0_12px_18px_rgba(0,0,0,0.14),0_4px_8px_rgba(0,0,0,0.1)] flex items-center justify-center text-center px-[24px]"
-              initial={heroCardEnter}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.66, ease: heroEase }}
-            >
-              <p className="text-[14px] font-medium text-white leading-[normal]">
-                Structured Business Data
-              </p>
-            </motion.div>
-
-            <motion.div
-              className="absolute left-[934px] top-[573px] z-20 flex h-[40px] w-[40px] items-center justify-center rounded-full bg-white text-[#0e0c0c] shadow-[0_8px_14px_rgba(0,0,0,0.18)]"
-              initial={heroCardEnter}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.34, delay: 0.68, ease: heroEase }}
-              aria-hidden
-            >
-              <ArrowDown className="h-5 w-5" strokeWidth={1.9} />
             </motion.div>
           </div>
         </div>
@@ -2491,14 +2843,14 @@ export default function Page() {
               <Btn
                 href="#how"
                 variant="primary"
-                className="box-border rounded-[12px] h-[44px] w-[240px] px-7 bg-[#2B5BC8] whitespace-nowrap leading-none"
+                className="box-border h-[46px] w-[240px] px-5 bg-[#6362CD] whitespace-nowrap leading-none"
               >
                 See How It Works
               </Btn>
               <Btn
                 href="/api"
                 variant="secondary"
-                className="box-border h-[44px] w-[240px] rounded-[12px] px-7 whitespace-nowrap leading-none"
+                className="box-border h-[46px] w-[240px] px-5 whitespace-nowrap leading-none"
               >
                 Explore API
               </Btn>
@@ -2511,7 +2863,8 @@ export default function Page() {
 
       {/* Problem → Solution */}
       <section id="problem" className="relative py-20 md:py-24 lg:py-28 bg-[#fafafa]">
-        <div className="mx-auto w-full max-w-[1280px] px-6">
+        <HeroHeadlineWaveTail />
+        <div className="relative z-[1] mx-auto w-full max-w-[1280px] px-6">
           <h2 className="sr-only">Operations overview</h2>
           {/* Section intro — single paragraph; browser wraps naturally within max-width */}
           <p className="max-w-[min(900px,100%)] text-[28px] md:text-[30px] font-medium leading-[1.4] tracking-[-0.01em] text-[#111827]">
@@ -2531,7 +2884,7 @@ export default function Page() {
                 className="group flex h-full flex-col rounded-[20px] bg-white p-8 lg:p-10 shadow-[0_2px_20px_rgba(0,0,0,0.04)] border border-[#f0f0f0] transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-[#e0e0e0]"
               >
                 <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-[#e8efff]">
-                  <card.icon className="h-[20px] w-[20px] text-[#2B5BC8]" strokeWidth={1.5} />
+                  <card.icon className="h-[20px] w-[20px] text-[#6362CD]" strokeWidth={1.5} />
                 </div>
                 <h3 className="text-[18px] font-semibold leading-[1.3] text-[#111] tracking-[-0.01em]">{card.title}</h3>
                 <p className="mt-3 text-[14.5px] leading-[1.65] text-[#6B7280] max-w-[300px]">{card.desc}</p>
@@ -2557,136 +2910,122 @@ export default function Page() {
       {/* Security — concise, product-style control */}
       <section id="governance" className="bg-white py-20 md:py-24 lg:py-28">
         <div className="mx-auto w-full max-w-[1280px] px-6">
-          <div className="rounded-2xl border border-gray-200 bg-white px-6 py-10 sm:px-8 md:px-10 md:py-12 shadow-[0_10px_30px_rgba(0,0,0,0.04)]">
-            <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:items-center lg:gap-12">
-              {/* PRIMARY (most prominent) */}
-              <div className="max-w-[520px]">
-                <div className="space-y-7">
-                  <div>
-                    <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
-                      You <span className="text-[#2B5BC8]">control</span> your data
-                    </h3>
-                    <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
-                      Your files stay yours. You decide where they live and how they're used.
-                    </p>
-                  </div>
+          <motion.div
+            className="rounded-2xl border border-gray-200 bg-white px-6 py-10 sm:px-8 md:px-10 md:py-12 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
+            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
+            whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
+            viewport={{ once: false, amount: 0.35 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <div className="mx-auto max-w-[760px] text-center">
+              <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
+                You control your data
+              </h3>
+              <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
+                Choose how your system runs. Your data stays where you decide.
+              </p>
+            </div>
 
-                  <div>
-                    <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
-                      <span className="text-[#2B5BC8]">Zero</span> data retention
-                    </h3>
-                    <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
-                      Data is processed and immediately discarded. Nothing is stored or cached.
-                    </p>
-                  </div>
+            <motion.div
+              className="mx-auto mt-8 max-w-[760px] rounded-[22px] border border-gray-200 bg-white px-5 py-5 sm:px-6 sm:py-6 shadow-[0_16px_50px_rgba(43,91,200,0.08)]"
+              initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
+              whileInView={reduceMotion ? {} : { opacity: 1, scale: 1 }}
+              viewport={{ once: false, amount: 0.45 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="grid grid-cols-[1fr_1px_1fr] items-end gap-x-5 sm:gap-x-8">
+                <div className="pb-3 text-left text-[13px] font-semibold uppercase tracking-[0.08em] text-[#111827]">
+                  local
+                </div>
+                <div className="self-stretch bg-gray-200" aria-hidden />
+                <div className="pb-3 text-left text-[13px] font-semibold uppercase tracking-[0.08em] text-[#111827]">
+                  cloud
                 </div>
               </div>
 
-              <div className="max-w-[420px]">
-                <motion.div
-                  className="relative overflow-hidden rounded-xl border border-gray-200 bg-white p-5 sm:p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
-                  initial={false}
-                  animate={{
-                    boxShadow:
-                      governanceEnv === "local"
-                        ? "0 18px 60px rgba(43, 91, 200, 0.12)"
-                        : "0 18px 60px rgba(63, 188, 149, 0.12)",
-                  }}
-                  transition={{
-                    duration: reduceMotion ? 0 : 0.45,
-                    ease: [0.22, 1, 0.36, 1],
-                  }}
-                >
-                  {/* Soft gradient shift when toggling */}
-                  <motion.div
-                    aria-hidden
-                    className="absolute -inset-16 opacity-70"
-                    initial={false}
-                    animate={
-                      governanceEnv === "local"
-                        ? { x: -18, y: 12, opacity: 0.8 }
-                        : { x: 18, y: -10, opacity: 0.8 }
-                    }
-                    transition={{
-                      duration: reduceMotion ? 0 : 0.6,
-                      ease: [0.22, 1, 0.36, 1],
-                    }}
-                    style={{
-                      background:
-                        governanceEnv === "local"
-                          ? "radial-gradient(ellipse 42% 36% at 30% 30%, rgba(61, 107, 255, 0.22) 0%, rgba(61, 107, 255, 0) 62%), radial-gradient(ellipse 42% 36% at 82% 72%, rgba(60, 59, 255, 0.18) 0%, rgba(60, 59, 255, 0) 62%)"
-                          : "radial-gradient(ellipse 42% 36% at 70% 30%, rgba(124, 58, 237, 0.22) 0%, rgba(124, 58, 237, 0) 62%), radial-gradient(ellipse 42% 36% at 20% 70%, rgba(61, 107, 255, 0.16) 0%, rgba(61, 107, 255, 0) 62%)",
-                    }}
-                  />
-
-                  <div className="relative">
-                    {/* Toggle (main focus) */}
-                    <div className="inline-flex w-full rounded-xl border border-gray-200 bg-gray-50 p-1">
-                      {[
-                        { id: "local", label: "Local" },
-                        { id: "vpc", label: "VPC" },
-                      ].map((opt) => {
-                        const active = governanceEnv === opt.id;
-                        return (
-                          <button
-                            key={opt.id}
-                            type="button"
-                            onClick={() => {
-                              setGovernanceEnv(opt.id);
-                              setGovernanceUserControlled(true);
-                            }}
-                            className={`relative flex-1 rounded-lg px-3 py-2.5 text-[13px] font-semibold select-none transition-colors ${
-                              active
-                                ? "bg-[#2B5BC8] text-white"
-                                : "bg-transparent text-gray-600 hover:text-gray-900"
-                            }`}
-                            aria-current={active ? "true" : "false"}
-                          >
-                            {opt.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Live state (fade + slide) */}
-                    <div className="mt-4">
-                      <AnimatePresence mode="wait" initial={false}>
-                        {governanceEnv === "local" ? (
-                          <motion.p
-                            key="gov-local-live"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{
-                              duration: reduceMotion ? 0 : 0.38,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                            className="text-[15px] font-semibold text-[#0B0F1A]"
-                          >
-                            Runs on your machine
-                          </motion.p>
-                        ) : (
-                          <motion.p
-                            key="gov-vpc-live"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -8 }}
-                            transition={{
-                              duration: reduceMotion ? 0 : 0.38,
-                              ease: [0.22, 1, 0.36, 1],
-                            }}
-                            className="text-[15px] font-semibold text-[#0B0F1A]"
-                          >
-                            Runs in your private cloud
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-                </motion.div>
+              <div className="grid grid-cols-[1fr_1px_1fr] gap-x-5 sm:gap-x-8">
+                <div className="border-t border-dashed border-gray-200" aria-hidden />
+                <div className="bg-gray-200" aria-hidden />
+                <div className="border-t border-dashed border-gray-200" aria-hidden />
               </div>
-            </div>
-          </div>
+
+              <div className="mt-5 space-y-5">
+                {[
+                  {
+                    local: {
+                      icon: Database,
+                      label: "You own your data",
+                      description: "Keep data inside your environment, under your policies and control.",
+                    },
+                    cloud: {
+                      icon: ShieldCheck,
+                      label: "Zero data retention",
+                      description: "Process data without storing it after the work is done.",
+                    },
+                  },
+                  {
+                    local: {
+                      icon: Coins,
+                      label: "Save tokens",
+                      description: "Run locally to avoid ongoing token usage and recurring cost.",
+                    },
+                    cloud: {
+                      icon: Cloud,
+                      label: "No overhead",
+                      description: "Skip the setup, scaling, and maintenance work of managing infrastructure.",
+                    },
+                  },
+                  {
+                    local: {
+                      icon: Layers,
+                      label: "Runs on your machine",
+                      description: "Deploy close to your team and systems in a self-contained setup.",
+                    },
+                    cloud: {
+                      icon: KeyRound,
+                      label: "Fully managed deployment",
+                      description: "Run in the cloud or your VPC with managed operations already in place.",
+                    },
+                  },
+                ].map((row, index) => (
+                  <motion.div
+                    key={row.local.label}
+                    className="grid grid-cols-1 gap-y-4 sm:grid-cols-[1fr_1px_1fr] sm:gap-x-8 sm:gap-y-0"
+                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+                    whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.7 }}
+                    transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.12 + index * 0.06 }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <row.local.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gray-500" aria-hidden />
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-medium leading-[1.35] text-[#111827]">
+                          {row.local.label}
+                        </p>
+                        <p className="mt-1 text-[12.5px] leading-[1.5] text-[#6B7280]">
+                          {row.local.description}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="hidden self-stretch bg-gray-200 sm:block" aria-hidden />
+
+                    <div className="flex items-start gap-3">
+                      <row.cloud.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gray-500" aria-hidden />
+                      <div className="min-w-0">
+                        <p className="text-[14px] font-medium leading-[1.35] text-[#111827]">
+                          {row.cloud.label}
+                        </p>
+                        <p className="mt-1 text-[12.5px] leading-[1.5] text-[#6B7280]">
+                          {row.cloud.description}
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
@@ -2694,7 +3033,7 @@ export default function Page() {
 
       {/* Final CTA */}
       <section
-        className="relative overflow-hidden bg-[#2B5BC8] py-24 md:py-28 lg:py-32"
+        className="relative overflow-hidden bg-[#6362CD] py-24 md:py-28 lg:py-32"
       >
         {/* Figma-style ambient gradients + static dot field */}
         <div
@@ -2715,7 +3054,7 @@ export default function Page() {
           }}
           aria-hidden
         />
-        <div className="cta-dark-dots" aria-hidden />
+        <DotGrid />
         <div className="relative flex flex-col items-center px-6 text-center">
           <h2 className="max-w-[820px] text-[2rem] font-normal leading-[1.2] tracking-tight text-white md:text-[2.5rem] lg:text-[3rem]">
             Stay focused on growth, we&apos;ll help you prevent operation risks
@@ -2724,10 +3063,15 @@ export default function Page() {
             href="#contact"
             className="mt-10 inline-flex h-[50px] items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-medium text-[#111827] transition-colors hover:bg-[#f2f5ff]"
           >
-            Book a Demo
+            Request a Demo
           </a>
         </div>
       </section>
+
+      <hr className="section-divider" aria-hidden />
+
+      {/* FAQ */}
+      <FaqSection />
 
       <hr className="section-divider" aria-hidden />
 
@@ -2742,7 +3086,7 @@ export default function Page() {
                 <span className="text-sm font-semibold text-gray-900">Omnigence</span>
               </div>
               <p className="mt-4 text-sm leading-relaxed text-gray-700">
-                Workflow checks with review-before-run control.
+                Move faster without losing control.
               </p>
             </div>
 
@@ -2751,13 +3095,13 @@ export default function Page() {
               <div>
                 <h4 className="text-sm font-semibold text-gray-900">Important links</h4>
                 <nav className="mt-4 flex flex-col gap-3" aria-label="Footer navigation">
-                  <a href="#product" className="text-sm text-gray-700 transition-colors hover:text-[#2B5BC8]">
+                  <a href="#product" className="text-sm text-gray-700 transition-colors hover:text-[#6362CD]">
                     Product
                   </a>
-                  <a href="#how" className="text-sm text-gray-700 transition-colors hover:text-[#2B5BC8]">
+                  <a href="#how" className="text-sm text-gray-700 transition-colors hover:text-[#6362CD]">
                     How it works
                   </a>
-                  <a href="#governance" className="text-sm text-gray-700 transition-colors hover:text-[#2B5BC8]">
+                  <a href="#governance" className="text-sm text-gray-700 transition-colors hover:text-[#6362CD]">
                     Security
                   </a>
                 </nav>
@@ -2766,15 +3110,10 @@ export default function Page() {
                 <h4 className="text-sm font-semibold text-gray-900">Contact</h4>
                 <a
                   href="mailto:omnigence.ai@gmail.com"
-                  className="mt-4 block text-sm text-gray-700 transition-colors hover:text-[#2B5BC8]"
+                  className="mt-4 block text-sm text-gray-700 transition-colors hover:text-[#6362CD]"
                 >
-                  hello@omnigence.ai
+                  omnigence.ai@gmail.com
                 </a>
-                <input
-                  type="email"
-                  placeholder="Your email"
-                  className="mt-4 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-500 outline-none focus:border-[#2B5BC8] focus:ring-1 focus:ring-[#2B5BC8]"
-                />
               </div>
             </div>
           </div>
