@@ -35,6 +35,7 @@ import {
   PenLine,
   ExternalLink,
   ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -154,6 +155,7 @@ const MultiAgentIcon = ({ className = "" }) => (
     <line x1="16" y1="8.8" x2="17.5" y2="10.6" />
   </svg>
 );
+
 
 const HERO_LEFT_GRID = "https://www.figma.com/api/mcp/asset/7dbad0a3-3458-47bd-b02f-d81883bb6c03";
 
@@ -775,7 +777,9 @@ const HowItWorks = () => {
       className="relative overflow-hidden bg-white py-24 md:py-28 lg:py-32"
     >
       <div className="mx-auto w-full max-w-[1280px] px-6">
-        <h2 className="sr-only">How it works</h2>
+        <div className="text-center mb-16 md:mb-20">
+          <span className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#6362CD]">How it works</span>
+        </div>
 
       {/* Step 1 — text left, visual right */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -810,6 +814,10 @@ const HowItWorks = () => {
         </div>
 
         <div className="max-w-[480px] order-1 lg:order-2 lg:py-4">
+          <div className="mb-4 flex items-center gap-3">
+            <img src="/pdf-logo.svg" alt="PDF" className="h-8 w-8 object-contain" />
+            <img src="/excel-logo.png" alt="Excel" className="h-8 w-8 object-contain" />
+          </div>
           <h3 className={howStepTitle}>From raw data to a finished document</h3>
           <p className={howStepBody}>
             PDFs, Excel sheets, exports from Microsoft and Adobe—Omnigence turns them into one clean,
@@ -1688,9 +1696,6 @@ const WhoItsForSection = () => {
                     <div className={`text-[15px] md:text-base font-bold ${active ? "text-gray-900" : "text-gray-800"}`}>
                       {p.title}
                     </div>
-                    <p className="mt-1 text-[13px] leading-snug text-gray-500 text-left line-clamp-2 sm:line-clamp-1">
-                      {p.description}
-                    </p>
                   </div>
                 </div>
                 {/* Progress strip removed to keep active card fully clean white */}
@@ -1707,30 +1712,9 @@ const WhoItsForSection = () => {
           aria-labelledby={`pillar-label-${pillar.id}`}
           id={`pillar-panel-${pillar.id}`}
         >
-          <div className="pillar-panel-gradient absolute inset-0 z-0 pointer-events-none" aria-hidden />
-          <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#95d7ff]/15 via-transparent to-[#8ebcff]/12 pointer-events-none" aria-hidden />
-          <div
-            className="absolute -right-20 -top-24 z-0 h-72 w-72 rounded-full bg-[#3D6BFF]/22 blur-[64px] pointer-events-none"
-            aria-hidden
-          />
-          <div
-            className="absolute -bottom-28 -left-16 z-0 h-64 w-64 rounded-full bg-[#a6c8ff]/18 blur-[56px] pointer-events-none"
-            aria-hidden
-          />
-          <div
-            className="pillar-panel-dots pointer-events-none absolute inset-0 z-[1]"
-            aria-hidden
-          />
-          <div
-            className="pointer-events-none absolute left-1/2 top-0 z-[2] h-[210px] w-[72%] -translate-x-1/2"
-            style={{
-              background:
-                "radial-gradient(ellipse 70% 62% at 50% 34%, rgba(13, 22, 48, 0.12) 0%, rgba(13, 22, 48, 0.06) 42%, rgba(13, 22, 48, 0) 78%)",
-            }}
-            aria-hidden
-          />
+          <div className="absolute inset-0 z-0 rounded-[inherit] bg-[#f4f4f5] pointer-events-none" aria-hidden />
 
-          <div className="relative z-10 m-4 p-6 sm:m-5 sm:p-8 md:m-6 md:p-10 min-h-[380px] sm:min-h-[420px] flex flex-col">
+          <div className="relative z-10 m-3 p-4 sm:m-4 sm:p-6 md:m-5 md:p-8 min-h-[300px] sm:min-h-[340px] flex flex-col">
             <AnimatePresence mode="wait">
               <motion.div
                 key={pillar.id}
@@ -1741,10 +1725,10 @@ const WhoItsForSection = () => {
                 className="flex flex-col flex-1"
               >
                 <div className="text-center max-w-xl mx-auto mb-5 md:mb-7">
-                  <h3 className="text-lg md:text-xl font-semibold tracking-tight text-[#0B0F1A]">
+                  <h3 className="text-lg md:text-xl font-semibold tracking-tight text-gray-900">
                     {panel.headline}
                   </h3>
-                  <p className="mt-2 text-sm text-[#4B5563] leading-relaxed">{panel.sub}</p>
+                  <p className="mt-2 text-sm text-gray-500 leading-relaxed">{panel.sub}</p>
                 </div>
                 <div className="flex-1 flex items-center justify-center w-full">
                   <div className="pillar-visual-stage w-full">
@@ -1938,7 +1922,7 @@ const SolutionsSection = () => {
                         {feature.eyebrow}
                       </span>
                     </div>
-                    <h2 className={`text-2xl font-normal leading-tight md:text-3xl lg:text-[2rem] transition-colors duration-300 ${isActive ? "text-gray-900" : "text-gray-500"}`}>
+                    <h2 className={`text-2xl font-medium leading-tight md:text-3xl lg:text-[2rem] transition-colors duration-300 ${isActive ? "text-gray-900" : "text-gray-500"}`}>
                       {feature.headline}
                     </h2>
                     <p className={`text-base leading-relaxed max-w-md transition-colors duration-300 ${isActive ? "text-gray-700" : "text-gray-600"}`}>
@@ -2101,56 +2085,132 @@ const FAQ_ITEMS = [
   },
 ];
 
-const FaqItem = ({ item, isOpen, onToggle }) => (
-  <div className="border-b border-gray-200 last:border-b-0">
-    <button
-      onClick={onToggle}
-      className="flex w-full items-center justify-between gap-4 py-6 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6362CD]/40 focus-visible:ring-offset-2 rounded-sm"
-    >
-      <span className="text-[17px] font-medium leading-snug text-gray-900">
-        {item.q}
-      </span>
-      <ChevronDown
-        className={`h-5 w-5 shrink-0 text-gray-400 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-        strokeWidth={1.5}
-      />
-    </button>
-    <AnimatePresence initial={false}>
-      {isOpen && (
-        <motion.div
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: "auto", opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
-          className="overflow-hidden"
-        >
-          <p className="max-w-[720px] pb-6 text-[15px] leading-[1.7] text-gray-500">
-            {item.a}
-          </p>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  </div>
-);
+const SECURITY_DATA = {
+  local: [
+    { icon: Database, label: "You own your data", description: "Keep data inside your environment, under your policies and control." },
+    { icon: Coins, label: "Save tokens", description: "Run locally to avoid ongoing token usage and recurring cost." },
+    { icon: Layers, label: "Runs on your machine", description: "Deploy close to your team and systems in a self-contained setup." },
+  ],
+  cloud: [
+    { icon: ShieldCheck, label: "Zero data retention", description: "Process data without storing it after the work is done." },
+    { icon: Cloud, label: "No overhead", description: "Skip the setup, scaling, and maintenance work of managing infrastructure." },
+    { icon: KeyRound, label: "Fully managed deployment", description: "Run in the cloud or your VPC with managed operations already in place." },
+  ],
+};
+
+const SecurityTabs = ({ reduceMotion }) => {
+  const [activeTab, setActiveTab] = useState("local");
+  const items = SECURITY_DATA[activeTab];
+
+  return (
+    <div className="mx-auto mt-8 max-w-[760px]">
+      {/* Tab switcher */}
+      <div className="flex justify-center">
+        <div className="inline-flex rounded-full border border-gray-200 bg-gray-50 p-1">
+          {["local", "cloud"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`relative rounded-full px-6 py-2 text-[13px] font-semibold uppercase tracking-[0.06em] transition-all duration-200 ${
+                activeTab === tab
+                  ? "bg-[#6362CD] text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 sm:p-8 shadow-[0_16px_50px_rgba(43,91,200,0.08)]">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: reduceMotion ? 0 : 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+            className="space-y-6"
+          >
+            {items.map((item) => (
+              <div key={item.label} className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#6362CD]/10">
+                  <item.icon className="h-[18px] w-[18px] text-[#6362CD]" strokeWidth={1.8} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[15px] font-semibold leading-[1.35] text-[#111827]">{item.label}</p>
+                  <p className="mt-1 text-[13.5px] leading-[1.6] text-[#6B7280]">{item.description}</p>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
 
 const FaqSection = () => {
-  const [openIndex, setOpenIndex] = useState(0);
+  const [openIndex, setOpenIndex] = useState(-1);
 
   return (
     <section className="bg-white py-24 md:py-28 lg:py-32">
       <Container>
-        <h2 className="text-[1.65rem] font-normal leading-[1.25] tracking-tight text-gray-900 md:text-[2rem]">
+        <h2 className="text-center text-[1.65rem] font-semibold leading-[1.25] tracking-tight text-gray-900 md:text-[2rem]">
           Common questions
         </h2>
-        <div className="mt-14">
-          {FAQ_ITEMS.map((item, i) => (
-            <FaqItem
-              key={i}
-              item={item}
-              isOpen={openIndex === i}
-              onToggle={() => setOpenIndex(openIndex === i ? -1 : i)}
-            />
-          ))}
+
+        <div className="mx-auto mt-10 max-w-[720px] space-y-3">
+          {FAQ_ITEMS.map((item, i) => {
+            const isOpen = openIndex === i;
+            return (
+              <div
+                key={i}
+                className={`rounded-xl border transition-colors duration-200 ${
+                  isOpen ? "border-gray-300 bg-white shadow-sm" : "border-gray-200 bg-gray-50/60"
+                }`}
+              >
+                <button
+                  onClick={() => setOpenIndex(isOpen ? -1 : i)}
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                >
+                  <span className="text-[15px] font-medium text-gray-900">{item.q}</span>
+                  <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 ${
+                    isOpen ? "border-[#6362CD] bg-[#6362CD]/10" : "border-gray-300"
+                  }`}>
+                    <svg width="12" height="12" viewBox="0 0 12 12" className={`text-${isOpen ? "[#6362CD]" : "gray-400"}`}>
+                      {isOpen ? (
+                        <line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                      ) : (
+                        <>
+                          <line x1="6" y1="2" x2="6" y2="10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          <line x1="2" y1="6" x2="10" y2="6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                        </>
+                      )}
+                    </svg>
+                  </div>
+                </button>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex gap-3 px-5 pb-5">
+                        <div className="w-[3px] shrink-0 rounded-full bg-[#6362CD]" />
+                        <p className="text-[14px] leading-[1.7] text-gray-500">{item.a}</p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </Container>
     </section>
@@ -2327,7 +2387,7 @@ export default function Page() {
           <div className="grid w-full grid-cols-1 lg:grid-cols-2 items-center gap-10 lg:gap-[44px]">
             {/* Left */}
             <div className="max-w-[440px]">
-              <h1 className="font-medium text-[48px] leading-[1.03] tracking-[-0.03em] text-gray-900 sm:text-[56px] lg:text-[64px]">
+              <h1 className="font-bold text-[48px] leading-[1.03] tracking-[-0.03em] text-gray-900 sm:text-[56px] lg:text-[64px]">
                 An AI agent you can train to run your operations
               </h1>
               <p className="mt-6 text-[16px] leading-[24px] text-[#6B7280]">
@@ -2622,53 +2682,6 @@ export default function Page() {
               />
             </motion.div>
 
-            {/* Flow connector lines */}
-            <svg
-              className="pointer-events-none absolute left-0 top-0 h-full w-full"
-              fill="none"
-              aria-hidden
-            >
-              {/* Structured Business Data → Discrepancies Flagged */}
-              <motion.path
-                d="M 1056 365 C 1068 365, 1068 248, 1082 248"
-                stroke="rgba(255,255,255,0.25)"
-                strokeWidth={1.2}
-                strokeDasharray="4 3"
-                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.58, ease: heroEase }}
-              />
-              {/* Structured Business Data → AI Task Completed */}
-              <motion.path
-                d="M 946 428 C 946 443, 900 451, 900 451"
-                stroke="rgba(255,255,255,0.25)"
-                strokeWidth={1.2}
-                strokeDasharray="4 3"
-                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.74, ease: heroEase }}
-              />
-              {/* AI Task Completed → Financial Summary */}
-              <motion.path
-                d="M 1056 551 C 1068 551, 1068 514, 1082 514"
-                stroke="rgba(255,255,255,0.25)"
-                strokeWidth={1.2}
-                strokeDasharray="4 3"
-                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 1.0, ease: heroEase }}
-              />
-              {/* Discrepancies Flagged → Financial Summary */}
-              <motion.path
-                d="M 1240 287 C 1240 303, 1240 322, 1240 322"
-                stroke="rgba(255,255,255,0.25)"
-                strokeWidth={1.2}
-                strokeDasharray="4 3"
-                initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 0.4, delay: 1.0, ease: heroEase }}
-              />
-            </svg>
 
             {/* Upload / structured buttons */}
             <motion.div
@@ -2833,7 +2846,7 @@ export default function Page() {
         {/* Mobile / tablet hero (large desktop uses the Figma-accurate block above) */}
         <div className="relative px-6 pb-16 lg:hidden">
           <div className="relative mx-auto max-w-[520px] pt-24 pb-8">
-            <h1 className="text-[40px] font-semibold leading-[1.05] tracking-[-0.04em] text-gray-900">
+            <h1 className="text-[40px] font-bold leading-[1.05] tracking-[-0.04em] text-gray-900">
               An AI agent you can train to run your operations
             </h1>
             <p className="mt-6 text-[16px] leading-[1.7] text-[#6B7280]">
@@ -2867,7 +2880,7 @@ export default function Page() {
         <div className="relative z-[1] mx-auto w-full max-w-[1280px] px-6">
           <h2 className="sr-only">Operations overview</h2>
           {/* Section intro — single paragraph; browser wraps naturally within max-width */}
-          <p className="max-w-[min(900px,100%)] text-[28px] md:text-[30px] font-medium leading-[1.4] tracking-[-0.01em] text-[#111827]">
+          <p className="mx-auto max-w-[min(900px,100%)] text-center text-[28px] md:text-[30px] font-medium leading-[1.4] tracking-[-0.01em] text-[#111827]">
             Less manual work. More connected operations. Fewer costly mistakes.{" "}
             <span className="text-[#6B7280]">Innovate your process from the ground up</span>
           </p>
@@ -2926,108 +2939,15 @@ export default function Page() {
               </p>
             </div>
 
-            <motion.div
-              className="mx-auto mt-8 max-w-[760px] rounded-[22px] border border-gray-200 bg-white px-5 py-5 sm:px-6 sm:py-6 shadow-[0_16px_50px_rgba(43,91,200,0.08)]"
-              initial={reduceMotion ? false : { opacity: 0, scale: 0.985 }}
-              whileInView={reduceMotion ? {} : { opacity: 1, scale: 1 }}
-              viewport={{ once: false, amount: 0.45 }}
-              transition={reduceMotion ? { duration: 0 } : { duration: 0.45, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="grid grid-cols-[1fr_1px_1fr] items-end gap-x-5 sm:gap-x-8">
-                <div className="pb-3 text-left text-[13px] font-semibold uppercase tracking-[0.08em] text-[#111827]">
-                  local
-                </div>
-                <div className="self-stretch bg-gray-200" aria-hidden />
-                <div className="pb-3 text-left text-[13px] font-semibold uppercase tracking-[0.08em] text-[#111827]">
-                  cloud
-                </div>
-              </div>
-
-              <div className="grid grid-cols-[1fr_1px_1fr] gap-x-5 sm:gap-x-8">
-                <div className="border-t border-dashed border-gray-200" aria-hidden />
-                <div className="bg-gray-200" aria-hidden />
-                <div className="border-t border-dashed border-gray-200" aria-hidden />
-              </div>
-
-              <div className="mt-5 space-y-5">
-                {[
-                  {
-                    local: {
-                      icon: Database,
-                      label: "You own your data",
-                      description: "Keep data inside your environment, under your policies and control.",
-                    },
-                    cloud: {
-                      icon: ShieldCheck,
-                      label: "Zero data retention",
-                      description: "Process data without storing it after the work is done.",
-                    },
-                  },
-                  {
-                    local: {
-                      icon: Coins,
-                      label: "Save tokens",
-                      description: "Run locally to avoid ongoing token usage and recurring cost.",
-                    },
-                    cloud: {
-                      icon: Cloud,
-                      label: "No overhead",
-                      description: "Skip the setup, scaling, and maintenance work of managing infrastructure.",
-                    },
-                  },
-                  {
-                    local: {
-                      icon: Layers,
-                      label: "Runs on your machine",
-                      description: "Deploy close to your team and systems in a self-contained setup.",
-                    },
-                    cloud: {
-                      icon: KeyRound,
-                      label: "Fully managed deployment",
-                      description: "Run in the cloud or your VPC with managed operations already in place.",
-                    },
-                  },
-                ].map((row, index) => (
-                  <motion.div
-                    key={row.local.label}
-                    className="grid grid-cols-1 gap-y-4 sm:grid-cols-[1fr_1px_1fr] sm:gap-x-8 sm:gap-y-0"
-                    initial={reduceMotion ? false : { opacity: 0, y: 12 }}
-                    whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
-                    viewport={{ once: false, amount: 0.7 }}
-                    transition={reduceMotion ? { duration: 0 } : { duration: 0.35, delay: 0.12 + index * 0.06 }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <row.local.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gray-500" aria-hidden />
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-medium leading-[1.35] text-[#111827]">
-                          {row.local.label}
-                        </p>
-                        <p className="mt-1 text-[12.5px] leading-[1.5] text-[#6B7280]">
-                          {row.local.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="hidden self-stretch bg-gray-200 sm:block" aria-hidden />
-
-                    <div className="flex items-start gap-3">
-                      <row.cloud.icon className="mt-0.5 h-[18px] w-[18px] shrink-0 text-gray-500" aria-hidden />
-                      <div className="min-w-0">
-                        <p className="text-[14px] font-medium leading-[1.35] text-[#111827]">
-                          {row.cloud.label}
-                        </p>
-                        <p className="mt-1 text-[12.5px] leading-[1.5] text-[#6B7280]">
-                          {row.cloud.description}
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+            <SecurityTabs reduceMotion={reduceMotion} />
           </motion.div>
         </div>
       </section>
+
+      <hr className="section-divider" aria-hidden />
+
+      {/* FAQ */}
+      <FaqSection />
 
       <hr className="section-divider" aria-hidden />
 
@@ -3035,7 +2955,6 @@ export default function Page() {
       <section
         className="relative overflow-hidden bg-[#6362CD] py-24 md:py-28 lg:py-32"
       >
-        {/* Figma-style ambient gradients + static dot field */}
         <div
           className="pointer-events-none absolute -left-[9%] top-[-172px] h-[928px] w-[55%]"
           style={{
@@ -3056,7 +2975,7 @@ export default function Page() {
         />
         <DotGrid />
         <div className="relative flex flex-col items-center px-6 text-center">
-          <h2 className="max-w-[820px] text-[2rem] font-normal leading-[1.2] tracking-tight text-white md:text-[2.5rem] lg:text-[3rem]">
+          <h2 className="max-w-[820px] text-[2rem] font-medium leading-[1.2] tracking-tight text-white md:text-[2.5rem] lg:text-[3rem]">
             Stay focused on growth, we&apos;ll help you prevent operation risks
           </h2>
           <a
@@ -3067,13 +2986,6 @@ export default function Page() {
           </a>
         </div>
       </section>
-
-      <hr className="section-divider" aria-hidden />
-
-      {/* FAQ */}
-      <FaqSection />
-
-      <hr className="section-divider" aria-hidden />
 
       {/* Footer */}
       <footer id="contact" className="bg-white pt-16 pb-8">

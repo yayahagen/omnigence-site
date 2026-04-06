@@ -200,23 +200,12 @@ img[alt="Omnigence logo"] {
 
 /* Three pillars — cool blue/aqua field with subtle violet depth */
 .pillar-panel-gradient {
-  background-image:
-    radial-gradient(ellipse 78% 58% at 86% 16%, rgba(61, 107, 255, 0.44) 0%, transparent 62%),
-    radial-gradient(ellipse 70% 52% at 14% 84%, rgba(124, 58, 237, 0.22) 0%, transparent 58%),
-    radial-gradient(ellipse 64% 48% at 46% 12%, rgba(60, 59, 255, 0.18) 0%, transparent 56%),
-    linear-gradient(
-      145deg,
-      rgba(231, 242, 255, 0.86) 0%,
-      rgba(61, 107, 255, 0.26) 28%,
-      rgba(43, 91, 200, 0.22) 52%,
-      rgba(60, 59, 255, 0.20) 74%,
-      rgba(124, 58, 237, 0.16) 100%
-    );
+  background: #f4f4f5;
 }
 
 /* Full-panel dot grid for pillar tab */
 .pillar-panel-dots {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.06) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 
@@ -226,8 +215,8 @@ img[alt="Omnigence logo"] {
   max-width: 42rem;
   margin-left: auto;
   margin-right: auto;
-  min-height: 20rem;
-  padding: clamp(1.25rem, 4vw, 2.75rem);
+  min-height: 16rem;
+  padding: clamp(1rem, 3vw, 2rem);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,19 +224,16 @@ img[alt="Omnigence logo"] {
 
 @media (min-width: 640px) {
   .pillar-visual-stage {
-    min-height: 24rem;
+    min-height: 18rem;
   }
 }
 
 /* Shared floating white card — stronger depth vs gradient + stage */
 .pillar-content-card {
-  background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+  background: #ffffff;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.88);
-  box-shadow:
-    0 0 0 1px rgba(13, 22, 48, 0.05),
-    0 16px 42px rgba(13, 22, 48, 0.14),
-    0 30px 78px rgba(13, 22, 48, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 /* Solutions section: product preview panel dot grid */
