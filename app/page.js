@@ -36,6 +36,11 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronRight,
+  Facebook,
+  Twitter,
+  Youtube,
+  Instagram,
+  Linkedin,
 } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -777,7 +782,7 @@ const HowItWorks = () => {
       className="relative overflow-hidden bg-white py-24 md:py-28 lg:py-32"
     >
       <div className="mx-auto w-full max-w-[1280px] px-6">
-        <div className="text-center mb-16 md:mb-20">
+        <div className="text-left mb-16 md:mb-20">
           <span className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#6362CD]">How it works</span>
         </div>
 
@@ -1631,7 +1636,7 @@ const WhoItsForSection = () => {
           onMouseLeave={() => setHoverPause(false)}
         >
         <motion.div
-          className="flex flex-col sm:flex-row flex-nowrap gap-3 md:gap-4"
+          className="flex flex-col sm:flex-row sm:justify-center flex-wrap gap-2 md:gap-3"
           role="tablist"
           aria-label="Core product capabilities"
           initial={false}
@@ -1685,19 +1690,15 @@ const WhoItsForSection = () => {
                     : { scale: 1.01, y: -1, transition: { duration: 0.2 } }
                 }
                 whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-                className={`relative flex flex-col flex-1 min-w-0 text-left rounded-2xl overflow-hidden select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6362CD]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#fafafa] ${
+                className={`relative inline-flex items-center justify-center rounded-full px-5 py-2.5 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6362CD]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition-colors ${
                   active
-                    ? "bg-white shadow-[0_4px_20px_rgba(0,0,0,0.07)] border border-black/[0.07] ring-1 ring-[#6362CD]/12"
-                    : "bg-[#F9FAFB] border border-[rgba(0,0,0,0.06)] hover:bg-[#f4f5f7]"
+                    ? "bg-white shadow-[0_2px_10px_rgba(0,0,0,0.06)] border border-black/[0.08] ring-1 ring-[#6362CD]/15"
+                    : "bg-transparent border border-[rgba(0,0,0,0.08)] hover:bg-gray-50"
                 }`}
               >
-                <div className="relative flex-1 px-4 py-4 md:px-5 md:py-4">
-                  <div className="pl-1">
-                    <div className={`text-[15px] md:text-base font-bold ${active ? "text-gray-900" : "text-gray-800"}`}>
-                      {p.title}
-                    </div>
-                  </div>
-                </div>
+                <span className={`text-[13px] md:text-[14px] font-semibold whitespace-nowrap ${active ? "text-gray-900" : "text-gray-500"}`}>
+                  {p.title}
+                </span>
                 {/* Progress strip removed to keep active card fully clean white */}
               </motion.button>
             );
@@ -1705,14 +1706,13 @@ const WhoItsForSection = () => {
         </motion.div>
 
         <div
-          className="mt-8 md:mt-10 relative overflow-hidden rounded-[22px] shadow-[0_8px_40px_rgba(0,0,0,0.07)] ring-1 ring-black/[0.05]"
+          className="mt-8 md:mt-10 relative overflow-hidden rounded-[22px]"
           role="tabpanel"
           aria-live="polite"
           aria-atomic="true"
           aria-labelledby={`pillar-label-${pillar.id}`}
           id={`pillar-panel-${pillar.id}`}
         >
-          <div className="absolute inset-0 z-0 rounded-[inherit] bg-[#f4f4f5] pointer-events-none" aria-hidden />
 
           <div className="relative z-10 m-3 p-4 sm:m-4 sm:p-6 md:m-5 md:p-8 min-h-[300px] sm:min-h-[340px] flex flex-col">
             <AnimatePresence mode="wait">
@@ -2309,6 +2309,119 @@ const useCountUp = ({ target, durationMs, start }) => {
 
   return value;
 };
+
+const TikTokIcon = ({ className = "" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5.8 20.1a6.34 6.34 0 0 0 10.86-4.43V8.69a8.16 8.16 0 0 0 4.77 1.52V6.79a4.85 4.85 0 0 1-1.84-.1z" />
+  </svg>
+);
+
+const PinterestIcon = ({ className = "" }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden>
+    <path d="M12 0C5.37 0 0 5.37 0 12c0 5.08 3.16 9.42 7.62 11.16-.11-.95-.2-2.4.04-3.44.22-.94 1.4-5.96 1.4-5.96s-.36-.72-.36-1.78c0-1.66.96-2.9 2.16-2.9 1.02 0 1.51.77 1.51 1.69 0 1.03-.66 2.57-1 4-.28 1.2.6 2.18 1.78 2.18 2.14 0 3.78-2.26 3.78-5.51 0-2.88-2.07-4.9-5.03-4.9-3.42 0-5.43 2.57-5.43 5.22 0 1.03.4 2.14.89 2.74.1.12.11.22.08.34-.09.37-.29 1.2-.33 1.36-.05.22-.17.27-.4.16-1.5-.7-2.43-2.89-2.43-4.65 0-3.78 2.75-7.26 7.92-7.26 4.16 0 7.39 2.96 7.39 6.93 0 4.13-2.6 7.45-6.22 7.45-1.21 0-2.36-.63-2.75-1.38l-.75 2.85c-.27 1.04-1 2.35-1.49 3.15.96.3 1.97.46 3.02.46 6.63 0 12-5.37 12-12S18.63 0 12 0z" />
+  </svg>
+);
+
+const FOOTER_COLUMNS = [
+  {
+    title: "Menu",
+    links: ["Home", "Pricing Plans", "API", "API Documentation"],
+  },
+  {
+    title: "Use Cases",
+    links: ["Explore All", "Finance Document AI", "Data Analytics AI"],
+  },
+  {
+    title: "Features",
+    links: ["AI Features", "Templatization", "Agentic Workflow", "Multi Agent"],
+  },
+  {
+    title: "Free AI Tools",
+    links: ["Explore All", "AI Workflow", "AI Analytics"],
+  },
+  {
+    title: "Company",
+    links: ["About Us", "Careers"],
+  },
+  {
+    title: "Legal",
+    links: ["Terms of Service", "Privacy Policy", "Refund Policy"],
+  },
+];
+
+const FOOTER_SOCIALS = [
+  { name: "Twitter", Icon: Twitter },
+  { name: "YouTube", Icon: Youtube },
+  { name: "TikTok", Icon: TikTokIcon },
+  { name: "Instagram", Icon: Instagram },
+  { name: "LinkedIn", Icon: Linkedin },
+];
+
+const SiteFooter = () => (
+  <footer id="contact" className="bg-white border-t border-gray-200 pt-20 pb-10">
+    <div className="mx-auto w-full max-w-[1280px] px-6">
+      {/* Top: brand + socials */}
+      <div className="flex flex-col gap-8 border-b border-gray-200 pb-12 md:flex-row md:items-start md:justify-between">
+        <div className="max-w-md">
+          <div className="flex items-center gap-2.5">
+            <OmnigenceLogo size={32} decorative />
+            <span className="text-base font-semibold text-gray-900">Omnigence</span>
+          </div>
+          <p className="mt-4 text-[14px] leading-relaxed text-gray-500">
+            Move faster without losing control. The AI agent you train to run your operations.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          {FOOTER_SOCIALS.map(({ name, Icon }) => (
+            <a
+              key={name}
+              href="#"
+              aria-label={name}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-500 transition-colors hover:border-[#6362CD]/30 hover:bg-[#6362CD]/[0.06] hover:text-[#6362CD]"
+            >
+              <Icon className="h-[15px] w-[15px]" strokeWidth={1.8} />
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* Columns */}
+      <div className="grid grid-cols-2 gap-x-8 gap-y-12 pt-12 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6">
+        {FOOTER_COLUMNS.map((col) => (
+          <div key={col.title} className="min-w-0">
+            <h4 className="text-[12px] font-semibold uppercase tracking-[0.08em] text-gray-900">
+              {col.title}
+            </h4>
+            <ul className="mt-5 space-y-3">
+              {col.links.map((link) => (
+                <li key={link}>
+                  <a
+                    href="#"
+                    className="text-[13px] leading-snug text-gray-500 transition-colors hover:text-[#6362CD]"
+                  >
+                    {link}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+
+      {/* Bottom bar */}
+      <div className="mt-16 flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-[12px] text-gray-400 sm:flex-row sm:items-center">
+        <span>&copy; {new Date().getFullYear()} Omnigence. All rights reserved.</span>
+        <a
+          href="mailto:omnigence.ai@gmail.com"
+          className="transition-colors hover:text-[#6362CD]"
+        >
+          omnigence.ai@gmail.com
+        </a>
+      </div>
+    </div>
+  </footer>
+);
 
 export default function Page() {
   const reduceMotion = useReducedMotion();
@@ -2923,24 +3036,16 @@ export default function Page() {
       {/* Security — concise, product-style control */}
       <section id="governance" className="bg-white py-20 md:py-24 lg:py-28">
         <div className="mx-auto w-full max-w-[1280px] px-6">
-          <motion.div
-            className="rounded-2xl border border-gray-200 bg-white px-6 py-10 sm:px-8 md:px-10 md:py-12 shadow-[0_10px_30px_rgba(0,0,0,0.04)]"
-            initial={reduceMotion ? false : { opacity: 0, y: 22 }}
-            whileInView={reduceMotion ? {} : { opacity: 1, y: 0 }}
-            viewport={{ once: false, amount: 0.35 }}
-            transition={reduceMotion ? { duration: 0 } : { duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="mx-auto max-w-[760px] text-center">
-              <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
-                You control your data
-              </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
-                Choose how your system runs. Your data stays where you decide.
-              </p>
-            </div>
+          <div className="mx-auto max-w-[760px] text-center">
+            <h3 className="text-[1.6rem] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0B0F1A] sm:text-[1.85rem]">
+              You control your data
+            </h3>
+            <p className="mt-3 text-[15px] leading-relaxed text-[#4B5563]">
+              Choose how your system runs. Your data stays where you decide.
+            </p>
+          </div>
 
-            <SecurityTabs reduceMotion={reduceMotion} />
-          </motion.div>
+          <SecurityTabs reduceMotion={reduceMotion} />
         </div>
       </section>
 
@@ -2988,58 +3093,7 @@ export default function Page() {
       </section>
 
       {/* Footer */}
-      <footer id="contact" className="bg-white pt-16 pb-8">
-        <Container>
-          <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,min(100%,28rem))] lg:items-start lg:justify-between lg:gap-16">
-            {/* Logo column */}
-            <div className="max-w-md">
-              <div className="flex items-center gap-2">
-                <OmnigenceLogo size={28} decorative />
-                <span className="text-sm font-semibold text-gray-900">Omnigence</span>
-              </div>
-              <p className="mt-4 text-sm leading-relaxed text-gray-700">
-                Move faster without losing control.
-              </p>
-            </div>
-
-            {/* Important links + Contact — grouped on the right */}
-            <div className="grid gap-10 sm:grid-cols-2 sm:gap-12 lg:max-w-xl lg:justify-self-end">
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900">Important links</h4>
-                <nav className="mt-4 flex flex-col gap-3" aria-label="Footer navigation">
-                  <a href="#product" className="text-sm text-gray-700 transition-colors hover:text-[#6362CD]">
-                    Product
-                  </a>
-                  <a href="#how" className="text-sm text-gray-700 transition-colors hover:text-[#6362CD]">
-                    How it works
-                  </a>
-                  <a href="#governance" className="text-sm text-gray-700 transition-colors hover:text-[#6362CD]">
-                    Security
-                  </a>
-                </nav>
-              </div>
-              <div>
-                <h4 className="text-sm font-semibold text-gray-900">Contact</h4>
-                <a
-                  href="mailto:omnigence.ai@gmail.com"
-                  className="mt-4 block text-sm text-gray-700 transition-colors hover:text-[#6362CD]"
-                >
-                  omnigence.ai@gmail.com
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-gray-300 pt-6 text-xs text-gray-600 sm:flex-row">
-            <span>Copyright &copy; omnigence {new Date().getFullYear()}</span>
-            <div className="flex gap-6">
-              <a href="#" className="transition-colors hover:text-gray-900">Privacy Policy</a>
-              <a href="#" className="transition-colors hover:text-gray-900">Terms &amp; Conditions</a>
-            </div>
-          </div>
-        </Container>
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
