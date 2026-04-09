@@ -699,7 +699,7 @@ const DataToDocumentDemo = () => {
   );
 };
 
-const howStepTitle = "text-[24px] md:text-[26px] lg:text-[28px] font-medium leading-[1.35] tracking-[-0.02em] text-gray-900";
+const howStepTitle = "text-[30px] md:text-[34px] lg:text-[38px] font-semibold leading-[1.2] tracking-[-0.02em] text-gray-900";
 const howStepBody = "mt-4 text-[16px] md:text-[17px] leading-relaxed text-gray-600 max-w-[440px]";
 const howStepGap = "mt-20 md:mt-24 lg:mt-28"; /* ~80–112px between story beats */
 
@@ -783,12 +783,16 @@ const HowItWorks = () => {
     >
       <div className="mx-auto w-full max-w-[1280px] px-6">
         <div className="text-left mb-16 md:mb-20">
-          <span className="text-[13px] font-semibold uppercase tracking-[0.1em] text-[#6362CD]">How it works</span>
+          <span className="text-[14px] font-semibold uppercase tracking-[0.1em] text-[#6362CD]">How it works</span>
         </div>
 
       {/* Step 1 — text left, visual right */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-        <div className="max-w-[480px] lg:py-4">
+        <div className="max-w-[480px] lg:ml-auto lg:py-4">
+          <div className="mb-4 flex items-center gap-3">
+            <img src="/word-logo.png" alt="Microsoft Word" className="h-8 w-8 object-contain" />
+            <img src="/google-docs-logo.png" alt="Google Docs" className="h-8 w-8 object-contain" />
+          </div>
           <h3 className={howStepTitle}>Upload your request</h3>
           <p className={howStepBody}>
             Upload a document or describe what you need. We handle PDFs, images, and plain text.
@@ -833,7 +837,11 @@ const HowItWorks = () => {
 
       {/* Step 3 — text left, visual right */}
       <div className={`${howStepGap} grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center`}>
-        <div className="max-w-[480px] lg:py-4">
+        <div className="max-w-[480px] lg:ml-auto lg:py-4">
+          <div className="mb-4 flex items-center gap-3">
+            <img src="/approve-badge.svg" alt="Approve" className="h-8 w-8 object-contain" />
+            <img src="/edit-badge.svg" alt="Edit" className="h-8 w-8 object-contain" />
+          </div>
           <h3 className={howStepTitle}>You approve what goes out</h3>
           <p className={howStepBody}>
             Review, tweak, or sign off. Nothing leaves your team until you say so.
@@ -1724,11 +1732,11 @@ const WhoItsForSection = () => {
                 transition={reduceMotion ? { duration: 0 } : { duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
                 className="flex flex-col flex-1"
               >
-                <div className="text-center max-w-xl mx-auto mb-5 md:mb-7">
-                  <h3 className="text-lg md:text-xl font-semibold tracking-tight text-gray-900">
+                <div className="text-center max-w-3xl mx-auto mb-5 md:mb-7">
+                  <h3 className="text-[1.6rem] sm:text-[1.85rem] md:text-[2rem] font-semibold leading-[1.2] tracking-tight text-gray-900 [text-wrap:balance]">
                     {panel.headline}
                   </h3>
-                  <p className="mt-2 text-sm text-gray-500 leading-relaxed">{panel.sub}</p>
+                  <p className="mt-3 text-[15px] text-gray-500 leading-relaxed [text-wrap:pretty] max-w-[560px] mx-auto">{panel.sub}</p>
                 </div>
                 <div className="flex-1 flex items-center justify-center w-full">
                   <div className="pillar-visual-stage w-full">

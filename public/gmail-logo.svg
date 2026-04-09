@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Envelope body -->
+  <path d="M4 9 L4 24 a2 2 0 0 0 2 2 L10 26 L10 15.5 L4 9 Z" fill="#4285F4"/>
+  <path d="M22 15.5 L22 26 L26 26 a2 2 0 0 0 2 -2 L28 9 L22 15.5 Z" fill="#34A853"/>
+  <path d="M10 15.5 L10 26 L22 26 L22 15.5 L16 20 Z" fill="#FBBC04"/>
+  <path d="M4 9 L10 15.5 L16 20 L22 15.5 L28 9 L28 8 a2 2 0 0 0 -2 -2 L26 6 L16 13.5 L6 6 a2 2 0 0 0 -2 2 Z" fill="#EA4335"/>
+  <path d="M4 9 L10 15.5 L10 6 L6 6 a2 2 0 0 0 -2 2 Z" fill="#C5221F"/>
+  <path d="M28 9 L22 15.5 L22 6 L26 6 a2 2 0 0 1 2 2 Z" fill="#C5221F" style="display:none"/>
+</svg>
